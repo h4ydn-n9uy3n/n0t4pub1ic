@@ -1,6 +1,6 @@
 # dependencies
 /node_modules
-/.pnp
+.pnp
 .pnp.js
 
 # testing
@@ -31,6 +31,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Node modules
+node_modules/
+.next/
 
 # Large media files
 *.mp3
