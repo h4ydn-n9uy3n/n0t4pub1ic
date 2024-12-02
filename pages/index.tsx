@@ -6,10 +6,13 @@ import { Toaster } from 'sonner';
 import { themes, ThemeNames } from '../utils/themes';
 import { extractColors } from '../utils/colorExtractor';
 import ThemeDecorations from '../components/ThemeDecorations';
+import { useSession, signOut } from 'next-auth/react';
+import Link from 'next/link';
 
 const DEFAULT_BG = "/webbg2.png";
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const [currentTheme, setCurrentTheme] = useState<ThemeNames>('happy');
   const [customTheme, setCustomTheme] = useState<null | {
     pageBackground: string;
@@ -146,6 +149,50 @@ export default function Home() {
         } : {})
       }}
     >
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <Link href="/" className="text-xl font-bold text-indigo-600">
+                  This Is For You
+                </Link>
+              </div>
+            </div>
+            <div className="flex items-center">
+              {status === 'loading' ? (
+                <div>Loading...</div>
+              ) : session ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700">Welcome, {session.user.email}</span>
+                  <button
+                    onClick={() => signOut()}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="space-x-4">
+                  <Link
+                    href="/auth/signin"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <div 
         className="min-h-screen"
         style={{ 
