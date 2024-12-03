@@ -1,5 +1,6 @@
 import React from 'react';
 import { ThemeNames } from '../utils/themes';
+import { CSSProperties } from 'react';
 
 interface ThemeDecorationsProps {
   currentTheme: ThemeNames;
@@ -446,7 +447,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
           const isLoaded = loadedImages.includes(src);
           const movement = imagePositions[src] || { x: 0, y: 0 };
 
-          const imageStyle = {
+          const imageStyle: CSSProperties = {
             position: 'absolute' as const,
             [side]: isRight ? '0%' : '0%', 
             top: position.y,
@@ -457,7 +458,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
             width: '163px', 
             height: '163px',
             zIndex: isImageEnlarged ? 1 : 20,
-            pointerEvents: isImageEnlarged ? 'none' : 'auto'
+            pointerEvents: 'none' as const
           };
 
           return (
