@@ -176,12 +176,20 @@ const getRingColorForTheme = (theme: ThemeNames): string => {
   switch (theme) {
     case 'happy':
       return 'ring-pink-400';
-    case 'sad':
-      return 'ring-blue-400';
-    case 'angry':
-      return 'ring-red-400';
     case 'calm':
+      return 'ring-blue-400';
+    case 'energetic':
+      return 'ring-red-400';
+    case 'dreamy':
+      return 'ring-purple-400';
+    case 'cozy':
+      return 'ring-orange-400';
+    case 'peaceful':
       return 'ring-green-400';
+    case 'romantic':
+      return 'ring-rose-400';
+    case 'melancholic':
+      return 'ring-indigo-400';
     default:
       return 'ring-gray-400';
   }
@@ -204,7 +212,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
 
   // Change image set based on mood only on initial render
   React.useEffect(() => {
-    if (currentTheme === 'sad' || currentTheme === 'angry') {
+    if (currentTheme === 'melancholic' || currentTheme === 'romantic') {
       // Only set initial state, don't override user's choice
       const hasUserToggled = (window as any).hasUserToggledImageSet;
       if (!hasUserToggled) {
@@ -229,7 +237,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
   }, [showCats]);
 
   // Theme-based styling
-  const isDark = currentTheme === 'sad' || currentTheme === 'angry';
+  const isDark = currentTheme === 'melancholic' || currentTheme === 'romantic';
   const ringColor = React.useMemo(() => {
     if (isDark) {
       return 'ring-purple-400 hover:ring-purple-300';
@@ -331,14 +339,26 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
       case 'happy':
         x = 30 * multiplier;
         break;
-      case 'sad':
+      case 'calm':
         x = -20 * multiplier;
         break;
-      case 'angry':
+      case 'energetic':
         x = 40 * multiplier;
         break;
-      case 'calm':
+      case 'dreamy':
         x = -15 * multiplier;
+        break;
+      case 'cozy':
+        x = 25 * multiplier;
+        break;
+      case 'peaceful':
+        x = -10 * multiplier;
+        break;
+      case 'romantic':
+        x = 35 * multiplier;
+        break;
+      case 'melancholic':
+        x = -25 * multiplier;
         break;
       default:
         x = 0;
