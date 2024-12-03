@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeNames } from '@/types/theme';
+import { ThemeNames } from '../utils/themes';
 
 interface ThemeDecorationsProps {
   currentTheme: ThemeNames;

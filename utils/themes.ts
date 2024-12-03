@@ -17,6 +17,8 @@ interface ThemeSet {
   [key: string]: ColorTheme;
 }
 
+export type ThemeNames = 'happy' | 'calm' | 'energetic' | 'dreamy' | 'cozy' | 'peaceful' | 'romantic' | 'melancholic';
+
 export const themes: ThemeSet = {
   happy: {
     name: 'Happy',
@@ -131,5 +133,3 @@ export const themes: ThemeSet = {
     }
   }
 };
-
-export type ThemeNames = keyof typeof themes;
