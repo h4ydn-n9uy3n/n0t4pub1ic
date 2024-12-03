@@ -164,12 +164,12 @@ export default function Home() {
                 <div>Loading...</div>
               ) : session ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">Welcome, {session.user.email}</span>
+                  <span className="text-gray-700">Welcome, {session?.user?.email}</span>
                   <button
                     onClick={() => signOut()}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                   >
-                    Sign Out
+                    Sign out
                   </button>
                 </div>
               ) : (
