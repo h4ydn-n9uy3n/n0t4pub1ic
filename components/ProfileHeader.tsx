@@ -172,12 +172,9 @@ const ProfileHeader = ({
         {/* Image Set Toggle Button */}
         <button 
           onClick={toggleImageSet}
-          className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+          className={`px-4 py-2 rounded-full w-fit text-white font-medium transition-colors duration-200 hover:opacity-80 shadow-lg hover:shadow-xl`}
           style={{
-            backgroundColor: getButtonColors(currentTheme).bg,
-            ':hover': {
-              backgroundColor: getButtonColors(currentTheme).hover
-            }
+            backgroundColor: getButtonColors(currentTheme).bg
           }}
         >
           Switch Image Set
