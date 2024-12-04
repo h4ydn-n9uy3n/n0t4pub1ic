@@ -22,8 +22,9 @@ const VideoUpload = ({
 
   useEffect(() => {
     setIsClient(true);
+    // Only use localStorage if it's a base64 video
     const savedVideo = localStorage.getItem('videoData');
-    if (savedVideo) {
+    if (savedVideo?.startsWith('data:video')) {
       setVideoUrl(savedVideo);
     }
 
@@ -88,11 +89,15 @@ const VideoUpload = ({
                 onError={(e) => {
                   console.error('Video error:', e);
                   setVideoError('Error loading video');
+                  toast.error('Error loading video');
                 }}
                 controlsList="nodownload"
+                playsInline
+                preload="metadata"
               >
                 <source src={videoUrl} type="video/quicktime" />
                 <source src={videoUrl} type="video/mp4" />
+                <source src={videoUrl} type="video/mov" />
                 {videoError || 'Your browser does not support the video tag.'}
               </video>
             </div>
