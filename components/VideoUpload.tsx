@@ -5,14 +5,16 @@ interface VideoUploadProps {
   emptySquareColor?: string;
   borderColor?: string;
   textColor?: string;
+  videoUrl?: string;
 }
 
 const VideoUpload = ({ 
   emptySquareColor = '#E0479E',
   borderColor = '#FF8FAB',
-  textColor = '#553E4E'
+  textColor = '#553E4E',
+  videoUrl: initialVideoUrl = '/reoten.mov'
 }: VideoUploadProps) => {
-  const [videoUrl, setVideoUrl] = useState<string>('/reoten.mov');  
+  const [videoUrl, setVideoUrl] = useState<string>(initialVideoUrl);
   const [videoError, setVideoError] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);

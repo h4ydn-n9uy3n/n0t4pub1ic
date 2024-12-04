@@ -364,6 +364,7 @@ export default function Home() {
               </div>
               <div className="flex justify-center">
                 <VideoUpload 
+                  videoUrl="/reoten.mov"
                   emptySquareColor={theme.emptySquareColor}
                   borderColor={theme.borderColor}
                   textColor={theme.fontColor}
