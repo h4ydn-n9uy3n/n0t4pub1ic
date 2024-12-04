@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { toast } from 'sonner';
 
 interface AudioFile {
   url: string;
@@ -13,10 +12,9 @@ interface MusicPlayerProps {
 
 const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState(0);
-  const [isReady, setIsReady] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [audioReady, setAudioReady] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -26,112 +24,66 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
   const analyserRef = useRef<AnalyserNode | null>(null);
 
   useEffect(() => {
-    const setupAudio = () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+    const audio = new Audio(audioFiles[0].url);
+    audio.preload = 'auto';
+    audioRef.current = audio;
 
-      // Ensure the audio URL is absolute for Vercel deployment
-      const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
-        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-        : '';
-      const audioUrl = `${baseUrl}${audioFiles[currentTrack].url}`;
-      
-      audioRef.current = new Audio(audioUrl);
-      audioRef.current.load();
-      
-      audioRef.current.addEventListener('canplaythrough', () => {
-        setIsReady(true);
-      });
-
-      audioRef.current.addEventListener('error', (e) => {
-        console.error('Audio loading error:', e);
-        toast.error('Error loading audio track');
-        setIsReady(false);
-      });
-
-      audioRef.current.addEventListener('timeupdate', () => {
-        setCurrentTime(audioRef.current.currentTime);
-        // Show title after 12 seconds without affecting playback
-        if (audioRef.current.currentTime >= 12) {
-          setShowTitle(true);
-        } else {
-          setShowTitle(false);
-        }
-      });
-
-      audioRef.current.addEventListener('loadedmetadata', () => {
-        setDuration(audioRef.current.duration);
-      });
-
-      audioRef.current.addEventListener('ended', () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
+    const handleCanPlay = () => setAudioReady(true);
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+      // Show title after 12 seconds without affecting playback
+      if (audio.currentTime >= 12) {
+        setShowTitle(true);
+      } else {
         setShowTitle(false);
-        audioRef.current.currentTime = 0;
-      });
+      }
+    };
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setShowTitle(false);
+      audio.currentTime = 0;
     };
 
-    setupAudio();
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+
+    // Initialize Web Audio API
+    const initAudioContext = async () => {
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 256;
+
+        const source = context.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(context.destination);
+
+        audioContextRef.current = context;
+        analyserRef.current = analyser;
+      } catch (error) {
+        console.error('Error initializing audio context:', error);
+      }
+    };
+
+    initAudioContext();
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
       if (audioContextRef.current) {
         audioContextRef.current.close();
-        audioContextRef.current = null;
       }
     };
-  }, [currentTrack, audioFiles]);
-
-  const initAudioContext = async () => {
-    if (!audioContextRef.current) {
-      try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        audioContextRef.current = new AudioContext();
-        await audioContextRef.current.resume();
-      } catch (error) {
-        console.error('Error initializing AudioContext:', error);
-        toast.error('Error initializing audio. Please try again.');
-      }
-    }
-  };
-
-  const togglePlay = async () => {
-    if (!audioRef.current || !isReady) return;
-
-    try {
-      if (!isPlaying) {
-        await initAudioContext();
-        await audioRef.current.play();
-        setIsPlaying(true);
-      } else {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      }
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      toast.error('Error playing audio. Please try again.');
-      setIsPlaying(false);
-    }
-  };
-
-  const nextTrack = () => {
-    setCurrentTrack((prev) => (prev + 1) % audioFiles.length);
-    setIsPlaying(false);
-    setIsReady(false);
-  };
-
-  const prevTrack = () => {
-    setCurrentTrack((prev) => (prev - 1 + audioFiles.length) % audioFiles.length);
-    setIsPlaying(false);
-    setIsReady(false);
-  };
+  }, [audioFiles]);
 
   const drawVisualizer = () => {
     if (!canvasRef.current || !analyserRef.current) return;
@@ -173,6 +125,29 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     }
   }, [isPlaying]);
 
+  const togglePlay = async () => {
+    if (!audioRef.current || !audioContextRef.current || !audioReady) return;
+
+    try {
+      await audioContextRef.current.resume();
+
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        if (audioRef.current.ended) {
+          audioRef.current.currentTime = 0;
+          setShowTitle(false);
+        }
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error('Error toggling playback:', error);
+      setIsPlaying(false);
+    }
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -184,68 +159,48 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       <div className="h-5">
         {showTitle && (
           <div className="text-center text-sm text-white/80 font-medium animate-fade-in">
-            {audioFiles[currentTrack].title}
+            {audioFiles[0].title}
           </div>
         )}
       </div>
       <div className="flex items-center space-x-4">
         <button
-          onClick={prevTrack}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          disabled={!isReady}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        
-        <button
           onClick={togglePlay}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          disabled={!isReady}
+          className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+            audioReady ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 cursor-wait'
+          }`}
+          disabled={!audioReady}
         >
           {isPlaying ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="4" width="4" height="16" />
+              <rect x="14" y="4" width="4" height="16" />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
             </svg>
           )}
         </button>
-
-        <button
-          onClick={nextTrack}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          disabled={!isReady}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-      
-      <div className="flex-1 flex items-center space-x-2">
-        <div className="flex-1 h-12 relative">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full rounded-lg"
-            width={300}
-            height={48}
-          />
+        
+        <div className="flex-1 flex items-center space-x-2">
+          <div className="flex-1 h-12 relative">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full rounded-lg"
+              width={300}
+              height={48}
+            />
+          </div>
+          <span className="text-xs opacity-60 min-w-[40px]">
+            {formatTime(currentTime)}
+          </span>
         </div>
-        <span className="text-xs opacity-60 min-w-[40px]">
-          {formatTime(currentTime)}
-        </span>
       </div>
-      
-      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm shadow-lg p-4 flex items-center justify-between cursor-default">
-        <span className="text-sm text-gray-500">
-          {isReady ? `Track ${currentTrack + 1} of ${audioFiles.length}` : 'Loading...'}
-        </span>
-      </div>
+      <div 
+        className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm shadow-lg p-4 flex items-center justify-between cursor-default"
+        style={{ zIndex: 1000 }}
+      />
     </div>
   );
 };

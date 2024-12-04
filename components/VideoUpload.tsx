@@ -17,24 +17,35 @@ const VideoUpload = ({
   const [videoUrl, setVideoUrl] = useState<string>(initialVideoUrl);
   const [videoError, setVideoError] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setIsClient(true);
-    // Only use localStorage if it's a base64 video
     const savedVideo = localStorage.getItem('videoData');
-    if (savedVideo?.startsWith('data:video')) {
+    if (savedVideo) {
       setVideoUrl(savedVideo);
-    } else {
-      // Ensure the video URL is absolute for Vercel deployment
-      const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
-        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-        : '';
-      setVideoUrl(`${baseUrl}${initialVideoUrl}`);
     }
-  }, [initialVideoUrl]);
+
+    // Add fullscreen change event listener
+    const handleFullscreenChange = () => {
+      const video = videoRef.current;
+      if (!video) return;
+      
+      if (document.fullscreenElement) {
+        video.style.objectFit = 'contain';
+        video.style.backgroundColor = 'black';
+      } else {
+        video.style.objectFit = 'cover';
+        video.style.backgroundColor = 'transparent';
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -55,18 +66,6 @@ const VideoUpload = ({
     }
   };
 
-  const handleVideoLoad = () => {
-    setIsLoaded(true);
-    setVideoError('');
-  };
-
-  const handleVideoError = (e: any) => {
-    console.error('Video error:', e);
-    setVideoError('Error loading video');
-    setIsLoaded(false);
-    toast.error('Error loading video. Please try refreshing the page.');
-  };
-
   return (
     <div className="flex flex-col items-center mt-8 mb-8">
       <div 
@@ -76,44 +75,26 @@ const VideoUpload = ({
           className="w-full h-full rounded-xl overflow-hidden border-2 transition-transform duration-300 ease-in-out group-hover:scale-105 bg-[#E0479E]"
           style={{ borderColor }}
         >
-          {isClient ? (
+          {isClient && videoUrl ? (
             <div className="w-full h-full relative">
-              {!isLoaded && !videoError && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                  <span className="text-gray-500">Loading video...</span>
-                </div>
-              )}
-              {videoUrl && (
-                <video 
-                  ref={videoRef}
-                  key={videoUrl}
-                  controls 
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{
-                    marginBottom: '-6px',
-                    opacity: isLoaded ? 1 : 0,
-                  }}
-                  onLoadedData={handleVideoLoad}
-                  onError={handleVideoError}
-                  controlsList="nodownload"
-                  playsInline
-                  preload="auto"
-                  muted
-                  autoPlay
-                  loop
-                >
-                  <source src={videoUrl} type="video/quicktime" />
-                  <source src={videoUrl} type="video/mp4" />
-                  <source src={videoUrl} type="video/mov" />
-                  <source src={videoUrl} />
-                  {videoError || 'Your browser does not support the video tag.'}
-                </video>
-              )}
-              {videoError && (
-                <div className="absolute inset-0 flex items-center justify-center bg-red-50">
-                  <span className="text-red-500">Failed to load video</span>
-                </div>
-              )}
+              <video 
+                ref={videoRef}
+                key={videoUrl}
+                controls 
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  marginBottom: '-6px',
+                }}
+                onError={(e) => {
+                  console.error('Video error:', e);
+                  setVideoError('Error loading video');
+                }}
+                controlsList="nodownload"
+              >
+                <source src={videoUrl} type="video/quicktime" />
+                <source src={videoUrl} type="video/mp4" />
+                {videoError || 'Your browser does not support the video tag.'}
+              </video>
             </div>
           ) : (
             <div 
@@ -122,7 +103,7 @@ const VideoUpload = ({
               onClick={() => fileInputRef.current?.click()}
             >
               <span style={{ color: textColor }} className="text-lg">
-                Loading...
+                Click to Upload
               </span>
             </div>
           )}
