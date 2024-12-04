@@ -30,7 +30,14 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       if (audioRef.current) {
         audioRef.current.pause();
       }
-      audioRef.current = new Audio(audioFiles[currentTrack].url);
+
+      // Ensure the audio URL is absolute for Vercel deployment
+      const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+        : '';
+      const audioUrl = `${baseUrl}${audioFiles[currentTrack].url}`;
+      
+      audioRef.current = new Audio(audioUrl);
       audioRef.current.load();
       
       audioRef.current.addEventListener('canplaythrough', () => {

@@ -27,8 +27,14 @@ const VideoUpload = ({
     const savedVideo = localStorage.getItem('videoData');
     if (savedVideo?.startsWith('data:video')) {
       setVideoUrl(savedVideo);
+    } else {
+      // Ensure the video URL is absolute for Vercel deployment
+      const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+        : '';
+      setVideoUrl(`${baseUrl}${initialVideoUrl}`);
     }
-  }, []);
+  }, [initialVideoUrl]);
 
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
