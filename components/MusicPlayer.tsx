@@ -197,10 +197,6 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
           </span>
         </div>
       </div>
-      <div 
-        className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm shadow-lg p-4 flex items-center justify-between cursor-default"
-        style={{ zIndex: 1000 }}
-      />
     </div>
   );
 };

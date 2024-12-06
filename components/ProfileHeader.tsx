@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import MusicPlayer from './MusicPlayer';
 import Image from 'next/image';
+import { ThemeNames } from '../utils/themes';
 
 interface ProfileHeaderProps {
   background: string;
@@ -12,29 +13,19 @@ interface ProfileHeaderProps {
     to: string;
   };
   toggleImageSet: () => void;
-  currentTheme: string;
+  currentTheme: ThemeNames;
   onImageEnlargedChange: (enlarged: boolean) => void;
 }
 
 const MAX_WIDTH = 400;
 const MIN_WIDTH = 200;
 
-const getButtonColors = (theme: string) => {
+const getButtonColors = (theme: ThemeNames) => {
   switch (theme) {
     case 'happy':
       return {
         bg: '#e0479e',
         hover: '#c23c87'
-      };
-    case 'sad':
-      return {
-        bg: '#6b21a8',
-        hover: '#581c87'
-      };
-    case 'angry':
-      return {
-        bg: '#7c3aed',
-        hover: '#6d28d9'
       };
     case 'calm':
       return {
@@ -76,11 +67,6 @@ const getButtonColors = (theme: string) => {
         bg: '#B8B8FF',
         hover: '#9F9FE6'
       };
-    case 'melancholic':
-      return {
-        bg: '#7B8B9E',
-        hover: '#647285'
-      };
     default:
       return {
         bg: '#ec4899',
@@ -120,10 +106,11 @@ const ProfileHeader = ({
 
     try {
       const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const base64String = e.target?.result as string;
         setProfileImage(base64String);
         setSelectedImage(null);
+        onImageEnlargedChange(false);
         localStorage.setItem('profileImage', base64String);
       };
       reader.readAsDataURL(file);
@@ -144,8 +131,7 @@ const ProfileHeader = ({
 
   const handleEnlargedImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedImage(null);
-    onImageEnlargedChange(false);
+    fileInputRef.current?.click();
   };
 
   return (
@@ -172,7 +158,7 @@ const ProfileHeader = ({
         {/* Image Set Toggle Button */}
         <button 
           onClick={toggleImageSet}
-          className={`px-4 py-2 rounded-full w-fit text-white font-medium transition-colors duration-200 hover:opacity-80 shadow-lg hover:shadow-xl`}
+          className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
           style={{
             backgroundColor: getButtonColors(currentTheme).bg
           }}

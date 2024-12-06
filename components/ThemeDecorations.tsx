@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemeNames } from '../utils/themes';
-import { CSSProperties } from 'react';
+import { ImagePosition, BasePosition, WindowWithImageSet, CSSProperties } from '../types';
 
 interface ThemeDecorationsProps {
   currentTheme: ThemeNames;
@@ -178,19 +178,7 @@ const getRingColorForTheme = (theme: ThemeNames): string => {
     case 'happy':
       return 'ring-pink-400';
     case 'calm':
-      return 'ring-blue-400';
-    case 'energetic':
-      return 'ring-red-400';
-    case 'dreamy':
-      return 'ring-purple-400';
-    case 'cozy':
-      return 'ring-orange-400';
-    case 'peaceful':
       return 'ring-green-400';
-    case 'romantic':
-      return 'ring-rose-400';
-    case 'melancholic':
-      return 'ring-indigo-400';
     default:
       return 'ring-gray-400';
   }
@@ -207,26 +195,25 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
   // Initialize state variables
   const [loadedImages, setLoadedImages] = React.useState<string[]>([]);
   const [errorImages, setErrorImages] = React.useState<string[]>([]);
-  const [imagePositions, setImagePositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
+  const [imagePositions, setImagePositions] = React.useState<{ [key: string]: ImagePosition }>({});
   const [scrollY, setScrollY] = React.useState(0);
   const [showCats, setShowCats] = React.useState(true);
 
   // Change image set based on mood only on initial render
   React.useEffect(() => {
-    if (currentTheme === 'melancholic' || currentTheme === 'romantic') {
-      // Only set initial state, don't override user's choice
-      const hasUserToggled = (window as any).hasUserToggledImageSet;
-      if (!hasUserToggled) {
-        setShowCats(false);
-      }
+    const win = window as WindowWithImageSet;
+    const hasUserToggled = win.hasUserToggledImageSet;
+    if (!hasUserToggled) {
+      setShowCats(true);
     }
   }, [currentTheme]);
 
   // Expose toggle function for external use
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      (window as any).toggleImageSet = () => {
-        (window as any).hasUserToggledImageSet = true; // Mark that user has made a choice
+      const win = window as WindowWithImageSet;
+      win.toggleImageSet = () => {
+        win.hasUserToggledImageSet = true; // Mark that user has made a choice
         setShowCats(prev => !prev);
       };
     }
@@ -238,13 +225,9 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
   }, [showCats]);
 
   // Theme-based styling
-  const isDark = currentTheme === 'melancholic' || currentTheme === 'romantic';
   const ringColor = React.useMemo(() => {
-    if (isDark) {
-      return 'ring-purple-400 hover:ring-purple-300';
-    }
     return 'ring-pink-400 hover:ring-pink-300';
-  }, [isDark]);
+  }, []);
 
   // Get current image set
   const currentImages = React.useMemo(() => 
@@ -261,7 +244,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
   const isInitialRender = React.useRef(true);
 
   // Generate stable random positions for consistent positioning
-  const generateStableRandomPositions = React.useCallback((count: number, isRight: boolean) => {
+  const generateStableRandomPositions = React.useCallback((count: number, isRight: boolean): BasePosition[] => {
     return Array(count).fill(0).map((_, index) => {
       // Use index as stable seed for consistency
       const seed = index * 1000;
@@ -302,7 +285,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
   );
 
   // Generate random movement for floating bubbles
-  const getRandomMovement = React.useCallback((src: string) => {
+  const getRandomMovement = React.useCallback((src: string): ImagePosition => {
     const seed = src.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const time = Date.now() / 3000; // Slower, more gentle floating
 
@@ -319,7 +302,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
   // Update positions continuously for floating effect
   React.useEffect(() => {
     const updatePositions = () => {
-      const newPositions: { [key: string]: { x: number; y: number } } = {};
+      const newPositions: { [key: string]: ImagePosition } = {};
       currentImages.forEach((src) => {
         newPositions[src] = getRandomMovement(src);
       });
@@ -341,25 +324,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
         x = 30 * multiplier;
         break;
       case 'calm':
-        x = -20 * multiplier;
-        break;
-      case 'energetic':
-        x = 40 * multiplier;
-        break;
-      case 'dreamy':
         x = -15 * multiplier;
-        break;
-      case 'cozy':
-        x = 25 * multiplier;
-        break;
-      case 'peaceful':
-        x = -10 * multiplier;
-        break;
-      case 'romantic':
-        x = 35 * multiplier;
-        break;
-      case 'melancholic':
-        x = -25 * multiplier;
         break;
       default:
         x = 0;
@@ -448,7 +413,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
           const movement = imagePositions[src] || { x: 0, y: 0 };
 
           const imageStyle: CSSProperties = {
-            position: 'absolute' as const,
+            position: 'absolute',
             [side]: isRight ? '0%' : '0%', 
             top: position.y,
             transform: `translate(${position.x + transform + movement.x}px, ${movement.y}px) scale(${position.scale * 1.02})`, 
@@ -458,7 +423,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
             width: '163px', 
             height: '163px',
             zIndex: isImageEnlarged ? 1 : 20,
-            pointerEvents: 'none' as const
+            pointerEvents: (isImageEnlarged ? 'none' : 'auto') as 'none' | 'auto'
           };
 
           return (
@@ -472,7 +437,7 @@ const ThemeDecorations: React.FC<ThemeDecorationsProps> = ({ currentTheme, isIma
                 ring-4 ring-opacity-60 shadow-lg
                 ${ringColor}
                 hover:scale-110 transition-all duration-1000 ease-in-out
-                ${isDark ? 'hover:shadow-purple-400/50' : 'hover:shadow-pink-400/50'}
+                ${'hover:shadow-pink-400/50'}
               `}>
                 <img
                   src={src}
