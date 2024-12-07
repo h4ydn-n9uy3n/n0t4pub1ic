@@ -4,13 +4,13 @@ const nextConfig = {
   swcMinify: true,
   images: {
     unoptimized: true,
+    domains: ['localhost'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: '*',
       },
     ],
-    domains: ['localhost'],
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false };
@@ -20,6 +20,7 @@ const nextConfig = {
     });
     return config;
   },
+  output: 'standalone'
 }
 
 module.exports = nextConfig
