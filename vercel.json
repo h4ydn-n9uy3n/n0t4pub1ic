@@ -48,11 +48,5 @@
       "source": "/audio/:path*",
       "destination": "/audio/:path*"
     }
-  ],
-  "functions": {
-    "api/audio": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  ]
 }
