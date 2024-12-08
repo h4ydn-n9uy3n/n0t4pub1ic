@@ -20,10 +20,7 @@ const nextConfig = {
     });
     return config;
   },
-  output: 'standalone',
-  experimental: {
-    optimizeCss: true
-  }
+  output: 'standalone'
 }
 
 module.exports = nextConfig
