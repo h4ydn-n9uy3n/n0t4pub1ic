@@ -28,34 +28,32 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
   useEffect(() => {
     const audio = new Audio();
     audio.crossOrigin = "anonymous";
+    
+    // Add cache-busting parameter for production
+    const audioUrl = process.env.NODE_ENV === 'production' 
+      ? `${audioFiles[0].url}?v=${Date.now()}`
+      : audioFiles[0].url;
+    
+    audio.src = audioUrl;
     audio.preload = 'auto';
+    audioRef.current = audio;
 
-    // Add loading state
-    setAudioReady(false);
-    setError(null);
-
-    const loadAudio = async () => {
-      try {
-        const response = await fetch(audioFiles[0].url);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        audio.src = url;
-        audioRef.current = audio;
-      } catch (error) {
-        console.error('Error fetching audio:', error);
-        setError('Error loading audio. Please try refreshing the page.');
-        setAudioReady(false);
-      }
-    };
-
-    loadAudio();
+    // Log environment info for debugging
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Loading audio from:', audioUrl);
 
     const handleCanPlay = () => {
+      console.log('Audio can play');
       setAudioReady(true);
       setError(null);
+    };
+
+    const handleLoadStart = () => {
+      console.log('Audio loading started');
+    };
+
+    const handleLoadedData = () => {
+      console.log('Audio data loaded');
     };
 
     const handleTimeUpdate = () => {
@@ -67,8 +65,11 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       }
     };
 
-    const handleLoadedMetadata = () => setDuration(audio.duration);
-    
+    const handleLoadedMetadata = () => {
+      console.log('Audio metadata loaded');
+      setDuration(audio.duration);
+    };
+
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
@@ -77,8 +78,31 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     };
 
     const handleError = (e: any) => {
-      console.error('Audio error:', e);
-      const errorMessage = e.target?.error?.message || 'Error loading audio';
+      const error = e.target?.error;
+      console.error('Audio error:', {
+        code: error?.code,
+        message: error?.message,
+        networkState: audio.networkState,
+        readyState: audio.readyState
+      });
+
+      let errorMessage = 'Error loading audio';
+      
+      switch(error?.code) {
+        case 1:
+          errorMessage = 'Audio loading aborted';
+          break;
+        case 2:
+          errorMessage = 'Network error occurred';
+          break;
+        case 3:
+          errorMessage = 'Audio decoding failed';
+          break;
+        case 4:
+          errorMessage = 'Audio source not supported';
+          break;
+      }
+
       setError(`${errorMessage}. Please try refreshing the page.`);
       setAudioReady(false);
       setIsPlaying(false);
@@ -93,7 +117,13 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       if (!audioReady && retryCount < maxRetries) {
         retryCount++;
         console.log(`Retrying audio load (attempt ${retryCount}/${maxRetries})...`);
-        loadAudio(); // Retry loading
+        
+        // For production, try with a new cache-busting parameter
+        if (process.env.NODE_ENV === 'production') {
+          audio.src = `${audioFiles[0].url}?v=${Date.now()}`;
+        }
+        
+        audio.load();
       } else if (!audioReady) {
         setError('Unable to load audio. Please check your connection and refresh the page.');
       }
@@ -101,6 +131,8 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
 
     const loadingTimeout = setInterval(tryLoadAudio, retryInterval);
 
+    audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('loadeddata', handleLoadedData);
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -109,7 +141,8 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
 
     return () => {
       clearInterval(loadingTimeout);
-      URL.revokeObjectURL(audio.src);
+      audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('loadeddata', handleLoadedData);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);

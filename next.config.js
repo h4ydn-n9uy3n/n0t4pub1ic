@@ -16,7 +16,10 @@ const nextConfig = {
     config.resolve.fallback = { fs: false };
     config.module.rules.push({
       test: /\.(mov|mp4|mp3)$/i,
-      type: 'asset/resource'
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name].[hash][ext]'
+      }
     });
     return config;
   },
@@ -36,19 +39,15 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET'
+            value: 'GET, OPTIONS'
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Range'
+            value: 'X-Requested-With, Content-Type, Accept, Range'
           },
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          },
-          {
-            key: 'Accept-Ranges',
-            value: 'bytes'
+            value: 'no-cache, no-store, must-revalidate'
           }
         ]
       }
