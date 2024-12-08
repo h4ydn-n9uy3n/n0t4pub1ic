@@ -29,13 +29,13 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     const audio = new Audio();
     audio.crossOrigin = "anonymous";
     
-    // Use relative URL in production
+    // Use relative URL and ensure proper encoding
     const audioUrl = process.env.NODE_ENV === 'production' 
-      ? `/audio/${audioFiles[0].url.split('/').pop()}?v=${Date.now()}`
+      ? `/audio/${encodeURIComponent(audioFiles[0].url.split('/').pop() || '')}?v=${Date.now()}`
       : audioFiles[0].url;
     
     audio.src = audioUrl;
-    audio.preload = 'metadata';  // Change to metadata first
+    audio.preload = 'auto';  // Changed to auto for better loading
     audioRef.current = audio;
 
     console.log('Environment:', process.env.NODE_ENV);
@@ -45,8 +45,6 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       console.log('Audio can play');
       setAudioReady(true);
       setError(null);
-      // Switch to auto preload after metadata is loaded
-      audio.preload = 'auto';
     };
 
     const handleLoadStart = () => {
@@ -88,7 +86,8 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
         message: error?.message,
         networkState: audio.networkState,
         readyState: audio.readyState,
-        currentSrc: audio.currentSrc
+        currentSrc: audio.currentSrc,
+        error: error
       });
 
       let errorMessage = 'Error loading audio';
@@ -115,35 +114,15 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       // Try to recover by reloading with a new cache-busting parameter
       if (process.env.NODE_ENV === 'production') {
         setTimeout(() => {
-          audio.src = `/audio/${audioFiles[0].url.split('/').pop()}?v=${Date.now()}`;
+          const newUrl = `/audio/${encodeURIComponent(audioFiles[0].url.split('/').pop() || '')}?v=${Date.now()}`;
+          console.log('Retrying with URL:', newUrl);
+          audio.src = newUrl;
           audio.load();
         }, 1000);
       }
     };
 
-    // Add loading timeout with retry
-    let retryCount = 0;
-    const maxRetries = 3;
-    const retryInterval = 5000; // 5 seconds
-
-    const tryLoadAudio = () => {
-      if (!audioReady && retryCount < maxRetries) {
-        retryCount++;
-        console.log(`Retrying audio load (attempt ${retryCount}/${maxRetries})...`);
-        
-        // For production, try with a new cache-busting parameter
-        if (process.env.NODE_ENV === 'production') {
-          audio.src = `/audio/${audioFiles[0].url.split('/').pop()}?v=${Date.now()}`;
-        }
-        
-        audio.load();
-      } else if (!audioReady) {
-        setError('Unable to load audio. Please check your connection and refresh the page.');
-      }
-    };
-
-    const loadingTimeout = setInterval(tryLoadAudio, retryInterval);
-
+    // Add event listeners
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('loadeddata', handleLoadedData);
     audio.addEventListener('canplay', handleCanPlay);
@@ -152,8 +131,10 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
 
+    // Initial load
+    audio.load();
+
     return () => {
-      clearInterval(loadingTimeout);
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.removeEventListener('loadeddata', handleLoadedData);
       audio.removeEventListener('canplay', handleCanPlay);
@@ -161,16 +142,18 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
+      
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
-      audio.src = '';  // Clear the source
-      audio.load();    // Reset the audio element
+      audio.pause();
+      audio.src = '';
+      audio.load();
     };
-  }, [audioFiles, audioReady]);
+  }, [audioFiles]);
 
   const initAudioContext = async () => {
     if (!audioRef.current) return;
