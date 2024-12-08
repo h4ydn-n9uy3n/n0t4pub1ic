@@ -168,7 +168,8 @@ const screenshotImages = [
   '/screenshots/462139596_18072742699574958_7616152482493014618_n.jpg',
   '/screenshots/Screenshot 2024-11-30 183928.jpg',
   '/screenshots/Screenshot 2024-11-30 183928.png',
-  '/screenshots/Screenshot 2024-11-30 183969.png'
+  '/screenshots/Screenshot 2024-11-30 183969.png',
+  '/screenshots/2E4A64B2-282E-4588-837E-85A9AF42898B.JPG'
 ];
 
 const fallbackImage = '/cats/download.jpg';
