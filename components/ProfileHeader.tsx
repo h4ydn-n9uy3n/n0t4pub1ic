@@ -192,17 +192,16 @@ const ProfileHeader = ({
               ${selectedImage ? 'inset-4' : 'inset-1.5'}
             `}>
               {isClient && profileImage ? (
-                <img 
-                  src={profileImage} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover transition-all duration-300"
-                  onError={(e) => {
-                    console.error('Error loading profile image');
-                    localStorage.removeItem('profileImage');
-                    setProfileImage(null);
-                    toast.error('Error loading profile image');
-                  }}
-                />
+                <div className="relative w-full h-full">
+                  <Image
+                    src={profileImage}
+                    alt="Profile"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div 
                   className="w-full h-full flex items-center justify-center"
@@ -303,9 +302,10 @@ const ProfileHeader = ({
             <Image
               src="/cats/Snaptik.app_74339702599813563092.png"
               alt="Header Image"
-              layout="fill"
-              objectFit="cover"
-              className="opacity-90"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
+              className="object-cover"
             />
           </div>
         </div>
@@ -339,10 +339,13 @@ const ProfileHeader = ({
               }}
             >
               <div className="w-full h-full rounded-full overflow-hidden shadow-2xl">
-                <img
+                <Image
                   src={selectedImage}
                   alt="Profile"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  priority
+                  className="object-cover"
                 />
               </div>
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity">
