@@ -155,7 +155,7 @@ const ProfileHeader = ({
           <MusicPlayer audioFiles={[
             {
               url: '/audio/mynhan.ogg',
-              title: 'New Audio Track'
+              title: 'My Nhan'
             }
           ]} className="text-white" />
         </div>
