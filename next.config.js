@@ -20,7 +20,11 @@ const nextConfig = {
     });
     return config;
   },
-  output: 'standalone'
+  output: 'standalone',
+  experimental: {
+    optimizeCss: false,
+    forceSwcTransforms: true
+  }
 }
 
 module.exports = nextConfig
