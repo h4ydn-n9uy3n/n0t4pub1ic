@@ -27,15 +27,37 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
 
   useEffect(() => {
     const audio = new Audio();
-    audio.crossOrigin = "anonymous"; // Enable CORS for audio context
-    audio.src = audioFiles[0].url;
+    audio.crossOrigin = "anonymous";
     audio.preload = 'auto';
-    audioRef.current = audio;
+
+    // Add loading state
+    setAudioReady(false);
+    setError(null);
+
+    const loadAudio = async () => {
+      try {
+        const response = await fetch(audioFiles[0].url);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        audio.src = url;
+        audioRef.current = audio;
+      } catch (error) {
+        console.error('Error fetching audio:', error);
+        setError('Error loading audio. Please try refreshing the page.');
+        setAudioReady(false);
+      }
+    };
+
+    loadAudio();
 
     const handleCanPlay = () => {
       setAudioReady(true);
       setError(null);
     };
+
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
       if (audio.currentTime >= 12) {
@@ -44,13 +66,16 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
         setShowTitle(false);
       }
     };
+
     const handleLoadedMetadata = () => setDuration(audio.duration);
+    
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
       setShowTitle(false);
       audio.currentTime = 0;
     };
+
     const handleError = (e: any) => {
       console.error('Audio error:', e);
       const errorMessage = e.target?.error?.message || 'Error loading audio';
@@ -68,7 +93,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       if (!audioReady && retryCount < maxRetries) {
         retryCount++;
         console.log(`Retrying audio load (attempt ${retryCount}/${maxRetries})...`);
-        audio.load(); // Retry loading
+        loadAudio(); // Retry loading
       } else if (!audioReady) {
         setError('Unable to load audio. Please check your connection and refresh the page.');
       }
@@ -84,6 +109,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
 
     return () => {
       clearInterval(loadingTimeout);
+      URL.revokeObjectURL(audio.src);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
