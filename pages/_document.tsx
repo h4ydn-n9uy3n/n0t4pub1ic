@@ -8,8 +8,10 @@ class MyDocument extends Document {
 
   render() {
     return (
-      <Html>
+      <Html lang="en">
         <Head>
+          <title>4U - A Personal Space</title>
+          <meta name="description" content="A personal space to share thoughts and memories" />
           <link 
             href="https://fonts.googleapis.com/css2?family=Exo:wght@400;500;600&family=Rouge+Script&display=swap" 
             rel="stylesheet"

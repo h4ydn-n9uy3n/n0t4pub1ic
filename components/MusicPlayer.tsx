@@ -51,24 +51,34 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       setShowTitle(false);
       audio.currentTime = 0;
     };
-    const handleError = (e: ErrorEvent) => {
+    const handleError = (e: any) => {
       console.error('Audio error:', e);
-      setError('Error loading audio');
+      const errorMessage = e.target?.error?.message || 'Error loading audio';
+      setError(`${errorMessage}. Please try again later.`);
       setAudioReady(false);
+      setIsPlaying(false);
     };
+
+    // Add loading timeout
+    const loadingTimeout = setTimeout(() => {
+      if (!audioReady) {
+        setError('Audio loading timeout. Please check your connection and try again.');
+      }
+    }, 10000); // 10 seconds timeout
 
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError as EventListener);
+    audio.addEventListener('error', handleError);
 
     return () => {
+      clearTimeout(loadingTimeout);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError as EventListener);
+      audio.removeEventListener('error', handleError);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -76,7 +86,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
         audioContextRef.current.close();
       }
     };
-  }, [audioFiles]);
+  }, [audioFiles, audioReady]);
 
   const initAudioContext = async () => {
     if (!audioRef.current) return;
@@ -210,14 +220,15 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
             audioReady ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 cursor-wait'
           }`}
           disabled={!audioReady}
+          aria-label={isPlaying ? 'Pause music' : 'Play music'}
         >
           {isPlaying ? (
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="6" y="4" width="4" height="16" />
               <rect x="14" y="4" width="4" height="16" />
             </svg>
           ) : (
-            <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
           )}

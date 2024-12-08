@@ -27,7 +27,9 @@ function ErrorFallback({ error }: { error: Error }) {
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <Component {...pageProps} />
+      <main>
+        <Component {...pageProps} />
+      </main>
       <Toaster position="top-center" />
     </ErrorBoundary>
   )
