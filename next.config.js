@@ -14,44 +14,12 @@ const nextConfig = {
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false };
-    config.module.rules.push({
-      test: /\.(mov|mp4|mp3)$/i,
-      type: 'asset/resource',
-      generator: {
-        filename: 'static/media/[name].[hash][ext]'
-      }
-    });
     return config;
   },
   output: 'standalone',
   experimental: {
     optimizeCss: false,
     forceSwcTransforms: true
-  },
-  async headers() {
-    return [
-      {
-        source: '/audio/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*'
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, OPTIONS'
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'X-Requested-With, Content-Type, Accept, Range'
-          },
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate'
-          }
-        ]
-      }
-    ]
   }
 }
 

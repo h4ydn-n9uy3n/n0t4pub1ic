@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
-import MusicPlayer from './MusicPlayer';
 import Image from 'next/image';
 import { ThemeNames } from '../utils/themes';
 
@@ -134,27 +133,18 @@ const ProfileHeader = ({
     fileInputRef.current?.click();
   };
 
+  const handleOverlayClick = () => {
+    setSelectedImage(null);
+    onImageEnlargedChange(false);
+  };
+
   return (
     <div 
       className="mt-10 mb-20 p-5 w-[700px] mx-auto rounded-xl shadow-lg animate-fadeIn transition-colors duration-300 relative z-0"
       style={{ backgroundColor: background }}
     >
-      {/* Music Player and Toggle Button Container */}
-      <div className={`
-        absolute top-4 right-4 flex flex-col items-end space-y-4 z-10
-        transition-all duration-300
-        ${selectedImage ? 'opacity-30 pointer-events-none blur-sm z-[-1]' : ''}
-      `}>
-        {/* Music Player */}
-        <div className="w-64">
-          <MusicPlayer audioFiles={[
-            {
-              url: '/audio/SET NHAC DANH CHO MY NHAN.mp3',
-              title: 'SET NHAC DANH CHO MY NHAN'
-            }
-          ]} className="text-white" />
-        </div>
-
+      {/* Header Actions */}
+      <div className="flex justify-between items-center mb-8">
         {/* Image Set Toggle Button */}
         <button 
           onClick={toggleImageSet}
@@ -329,40 +319,33 @@ const ProfileHeader = ({
           {/* Background Overlay */}
           <div
             className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[99998] pointer-events-auto"
-            onClick={() => {
-              setSelectedImage(null);
-              onImageEnlargedChange(false);
-            }}
+            onClick={handleOverlayClick}
           />
 
           {/* Enlarged Image Modal */}
           <div
             className="fixed inset-0 z-[99999] flex items-center justify-center"
-            onClick={() => {
-              setSelectedImage(null);
-              onImageEnlargedChange(false);
-            }}
+            onClick={handleOverlayClick}
           >
             {/* Enlarged Image */}
             <div
-              className="relative cursor-pointer w-96 h-96"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEnlargedImageClick(e);
-              }}
+              className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] rounded-full overflow-hidden cursor-pointer group"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-full h-full rounded-full overflow-hidden shadow-2xl">
-                <Image
-                  src={selectedImage}
-                  alt="Profile"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  priority
-                  className="object-cover"
-                />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity">
-                <span className="text-white">Click to change</span>
+              <Image
+                src={selectedImage}
+                alt="Enlarged profile"
+                fill
+                sizes="(max-width: 768px) 300px, 400px"
+                className="object-cover rounded-full"
+                priority
+              />
+              {/* Hover Overlay */}
+              <div 
+                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                onClick={handleEnlargedImageClick}
+              >
+                <span className="text-white text-lg font-medium">Click to change</span>
               </div>
             </div>
           </div>
