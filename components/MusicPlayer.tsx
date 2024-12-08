@@ -29,16 +29,15 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     const audio = new Audio();
     audio.crossOrigin = "anonymous";
     
-    // Add cache-busting parameter for production
+    // Use relative URL in production
     const audioUrl = process.env.NODE_ENV === 'production' 
-      ? `${audioFiles[0].url}?v=${Date.now()}`
+      ? `/audio/${audioFiles[0].url.split('/').pop()}?v=${Date.now()}`
       : audioFiles[0].url;
     
     audio.src = audioUrl;
-    audio.preload = 'auto';
+    audio.preload = 'metadata';  // Change to metadata first
     audioRef.current = audio;
 
-    // Log environment info for debugging
     console.log('Environment:', process.env.NODE_ENV);
     console.log('Loading audio from:', audioUrl);
 
@@ -46,14 +45,18 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       console.log('Audio can play');
       setAudioReady(true);
       setError(null);
+      // Switch to auto preload after metadata is loaded
+      audio.preload = 'auto';
     };
 
     const handleLoadStart = () => {
       console.log('Audio loading started');
+      setError(null);
     };
 
     const handleLoadedData = () => {
       console.log('Audio data loaded');
+      setError(null);
     };
 
     const handleTimeUpdate = () => {
@@ -68,6 +71,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     const handleLoadedMetadata = () => {
       console.log('Audio metadata loaded');
       setDuration(audio.duration);
+      setError(null);
     };
 
     const handleEnded = () => {
@@ -83,7 +87,8 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
         code: error?.code,
         message: error?.message,
         networkState: audio.networkState,
-        readyState: audio.readyState
+        readyState: audio.readyState,
+        currentSrc: audio.currentSrc
       });
 
       let errorMessage = 'Error loading audio';
@@ -106,6 +111,14 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       setError(`${errorMessage}. Please try refreshing the page.`);
       setAudioReady(false);
       setIsPlaying(false);
+
+      // Try to recover by reloading with a new cache-busting parameter
+      if (process.env.NODE_ENV === 'production') {
+        setTimeout(() => {
+          audio.src = `/audio/${audioFiles[0].url.split('/').pop()}?v=${Date.now()}`;
+          audio.load();
+        }, 1000);
+      }
     };
 
     // Add loading timeout with retry
@@ -120,7 +133,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
         
         // For production, try with a new cache-busting parameter
         if (process.env.NODE_ENV === 'production') {
-          audio.src = `${audioFiles[0].url}?v=${Date.now()}`;
+          audio.src = `/audio/${audioFiles[0].url.split('/').pop()}?v=${Date.now()}`;
         }
         
         audio.load();
@@ -154,6 +167,8 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
+      audio.src = '';  // Clear the source
+      audio.load();    // Reset the audio element
     };
   }, [audioFiles, audioReady]);
 
