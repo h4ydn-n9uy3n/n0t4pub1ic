@@ -16,22 +16,28 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
   const [duration, setDuration] = useState(0);
   const [audioReady, setAudioReady] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>();
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
 
   useEffect(() => {
-    const audio = new Audio(audioFiles[0].url);
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous"; // Enable CORS for audio context
+    audio.src = audioFiles[0].url;
     audio.preload = 'auto';
     audioRef.current = audio;
 
-    const handleCanPlay = () => setAudioReady(true);
+    const handleCanPlay = () => {
+      setAudioReady(true);
+      setError(null);
+    };
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
-      // Show title after 12 seconds without affecting playback
       if (audio.currentTime >= 12) {
         setShowTitle(true);
       } else {
@@ -45,37 +51,24 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       setShowTitle(false);
       audio.currentTime = 0;
     };
+    const handleError = (e: ErrorEvent) => {
+      console.error('Audio error:', e);
+      setError('Error loading audio');
+      setAudioReady(false);
+    };
 
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
-
-    // Initialize Web Audio API
-    const initAudioContext = async () => {
-      try {
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const analyser = context.createAnalyser();
-        analyser.fftSize = 256;
-
-        const source = context.createMediaElementSource(audio);
-        source.connect(analyser);
-        analyser.connect(context.destination);
-
-        audioContextRef.current = context;
-        analyserRef.current = analyser;
-      } catch (error) {
-        console.error('Error initializing audio context:', error);
-      }
-    };
-
-    initAudioContext();
+    audio.addEventListener('error', handleError as EventListener);
 
     return () => {
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError as EventListener);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -84,6 +77,37 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       }
     };
   }, [audioFiles]);
+
+  const initAudioContext = async () => {
+    if (!audioRef.current) return;
+
+    try {
+      if (!audioContextRef.current) {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 256;
+
+        const source = context.createMediaElementSource(audioRef.current);
+        source.connect(analyser);
+        analyser.connect(context.destination);
+
+        audioContextRef.current = context;
+        analyserRef.current = analyser;
+        sourceRef.current = source;
+      }
+
+      // Resume the audio context
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      setError(null);
+    } catch (error) {
+      console.error('Error initializing audio context:', error);
+      setError('Error initializing audio');
+      setIsPlaying(false);
+    }
+  };
 
   const drawVisualizer = () => {
     if (!canvasRef.current || !analyserRef.current) return;
@@ -126,10 +150,13 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
   }, [isPlaying]);
 
   const togglePlay = async () => {
-    if (!audioRef.current || !audioContextRef.current || !audioReady) return;
+    if (!audioRef.current || !audioReady) return;
 
     try {
-      await audioContextRef.current.resume();
+      // Initialize audio context on first play
+      if (!audioContextRef.current) {
+        await initAudioContext();
+      }
 
       if (isPlaying) {
         audioRef.current.pause();
@@ -139,11 +166,19 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
           audioRef.current.currentTime = 0;
           setShowTitle(false);
         }
+
+        // Resume audio context if suspended
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
+
         await audioRef.current.play();
         setIsPlaying(true);
+        setError(null);
       }
     } catch (error) {
       console.error('Error toggling playback:', error);
+      setError('Error playing audio');
       setIsPlaying(false);
     }
   };
@@ -160,6 +195,11 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
         {showTitle && (
           <div className="text-center text-sm text-white/80 font-medium animate-fade-in">
             {audioFiles[0].title}
+          </div>
+        )}
+        {error && (
+          <div className="text-center text-sm text-red-400 font-medium animate-fade-in">
+            {error}
           </div>
         )}
       </div>
