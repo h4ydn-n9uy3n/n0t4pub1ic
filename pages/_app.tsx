@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app'
 import { Toaster } from 'sonner'
 import { ErrorBoundary } from 'react-error-boundary'
+import Head from 'next/head';
 import '../styles/globals.css'
 
 function ErrorFallback({ error }: { error: Error }) {
@@ -27,6 +28,10 @@ function ErrorFallback({ error }: { error: Error }) {
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <Head>
+        <title>4U - A Personal Space</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
       <main>
         <Component {...pageProps} />
       </main>

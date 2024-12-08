@@ -54,17 +54,27 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     const handleError = (e: any) => {
       console.error('Audio error:', e);
       const errorMessage = e.target?.error?.message || 'Error loading audio';
-      setError(`${errorMessage}. Please try again later.`);
+      setError(`${errorMessage}. Please try refreshing the page.`);
       setAudioReady(false);
       setIsPlaying(false);
     };
 
-    // Add loading timeout
-    const loadingTimeout = setTimeout(() => {
-      if (!audioReady) {
-        setError('Audio loading timeout. Please check your connection and try again.');
+    // Add loading timeout with retry
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryInterval = 5000; // 5 seconds
+
+    const tryLoadAudio = () => {
+      if (!audioReady && retryCount < maxRetries) {
+        retryCount++;
+        console.log(`Retrying audio load (attempt ${retryCount}/${maxRetries})...`);
+        audio.load(); // Retry loading
+      } else if (!audioReady) {
+        setError('Unable to load audio. Please check your connection and refresh the page.');
       }
-    }, 10000); // 10 seconds timeout
+    };
+
+    const loadingTimeout = setInterval(tryLoadAudio, retryInterval);
 
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -73,7 +83,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     audio.addEventListener('error', handleError);
 
     return () => {
-      clearTimeout(loadingTimeout);
+      clearInterval(loadingTimeout);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
