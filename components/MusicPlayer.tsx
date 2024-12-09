@@ -116,7 +116,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       // Try to recover by reloading with a new cache-busting parameter
       if (process.env.NODE_ENV === 'production') {
         setTimeout(() => {
-          const newUrl = `/audio/${encodeURIComponent(audioFiles[0].url.split('/').pop() || '')}?v=${Date.now()}`;
+          const newUrl = `/audio/setnhac.mp3?v=${Date.now()}`;
           console.log('Retrying with URL:', newUrl);
           audio.src = newUrl;
           audio.load();
