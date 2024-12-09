@@ -144,6 +144,16 @@ const ProfileHeader = ({
       className="mt-10 mb-20 p-5 w-[700px] mx-auto rounded-xl shadow-lg animate-fadeIn transition-colors duration-300 relative z-0"
       style={{ backgroundColor: background }}
     >
+      {/* Music Player */}
+      <div className="absolute top-4 right-4 w-64">
+        <MusicPlayer audioFiles={[
+          {
+            url: '/audio/setnhac.ogg',
+            title: 'Set Nhac'
+          }
+        ]} className="text-white" />
+      </div>
+
       {/* Toggle Button Container */}
       <div className={`
         absolute top-4 right-4 flex flex-col items-end space-y-4 z-10
@@ -317,16 +327,6 @@ const ProfileHeader = ({
             />
           </div>
         </div>
-      </div>
-
-      {/* Music Player */}
-      <div className="w-64">
-        <MusicPlayer audioFiles={[
-          {
-            url: '/audio/setnhac.ogg',
-            title: 'Set Nhac'
-          }
-        ]} className="text-white" />
       </div>
 
       {selectedImage && (
