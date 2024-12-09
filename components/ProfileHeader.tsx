@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { ThemeNames } from '../utils/themes';
-import MusicPlayer from '../components/MusicPlayer'; // Import MusicPlayer component
 
 interface ProfileHeaderProps {
   background: string;
@@ -144,16 +143,6 @@ const ProfileHeader = ({
       className="mt-10 mb-20 p-5 w-[700px] mx-auto rounded-xl shadow-lg animate-fadeIn transition-colors duration-300 relative z-0"
       style={{ backgroundColor: background }}
     >
-      {/* Music Player */}
-      <div className="absolute top-4 right-4 w-64">
-        <MusicPlayer audioFiles={[
-          {
-            url: '/video/setnhac.mp4',
-            title: 'Set Nhac'
-          }
-        ]} className="text-white" />
-      </div>
-
       {/* Toggle Button Container */}
       <div className={`
         absolute top-4 right-4 flex flex-col items-end space-y-4 z-10
