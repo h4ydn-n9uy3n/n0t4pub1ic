@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
-import MusicPlayer from './MusicPlayer';
 import Image from 'next/image';
 import { ThemeNames } from '../utils/themes';
 
@@ -144,21 +143,12 @@ const ProfileHeader = ({
       className="mt-10 mb-20 p-5 w-[700px] mx-auto rounded-xl shadow-lg animate-fadeIn transition-colors duration-300 relative z-0"
       style={{ backgroundColor: background }}
     >
-      {/* Music Player and Toggle Button Container */}
+      {/* Toggle Button Container */}
       <div className={`
         absolute top-4 right-4 flex flex-col items-end space-y-4 z-10
         transition-all duration-300
         ${selectedImage ? 'opacity-30 pointer-events-none blur-sm z-[-1]' : ''}
       `}>
-        {/* Music Player */}
-        <div className="w-64">
-          <MusicPlayer audioFiles={[
-            {
-              url: '/audio/mynhan.ogg',
-              title: 'My Nhan'
-            }
-          ]} className="text-white" />
-        </div>
         {/* Image Set Toggle Button */}
         <button 
           onClick={toggleImageSet}
