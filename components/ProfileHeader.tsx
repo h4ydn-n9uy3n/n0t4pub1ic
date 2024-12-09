@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { ThemeNames } from '../utils/themes';
+import MusicPlayer from '../components/MusicPlayer'; // Import MusicPlayer component
 
 interface ProfileHeaderProps {
   background: string;
@@ -316,6 +317,16 @@ const ProfileHeader = ({
             />
           </div>
         </div>
+      </div>
+
+      {/* Music Player */}
+      <div className="w-64">
+        <MusicPlayer audioFiles={[
+          {
+            url: '/audio/setnhac.ogg',
+            title: 'Set Nhac'
+          }
+        ]} className="text-white" />
       </div>
 
       {selectedImage && (
