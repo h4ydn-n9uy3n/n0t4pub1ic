@@ -148,7 +148,7 @@ const ProfileHeader = ({
       <div className="absolute top-4 right-4 w-64">
         <MusicPlayer audioFiles={[
           {
-            url: '/audio/setnhac.mp3',
+            url: '/video/setnhac.mp4',
             title: 'Set Nhac'
           }
         ]} className="text-white" />
