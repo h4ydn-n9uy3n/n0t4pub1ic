@@ -33,6 +33,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     const audioUrl = process.env.NODE_ENV === 'production' 
       ? `/audio/${encodeURIComponent(audioFiles[0].url.split('/').pop() || '')}?v=${Date.now()}`
       : audioFiles[0].url;
+    console.log('Constructed audio URL:', audioUrl);
     
     audio.src = audioUrl;
     audio.preload = 'auto';  // Changed to auto for better loading
@@ -80,6 +81,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     };
 
     const handleError = (e: any) => {
+      console.error('Attempting to load audio from:', audio.src);
       const error = e.target?.error;
       console.error('Audio error:', {
         code: error?.code,
