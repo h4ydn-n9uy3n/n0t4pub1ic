@@ -340,7 +340,8 @@ const ProfileHeader = ({
           onClick={handlePlayPause} 
           className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
           style={{
-            backgroundColor: getButtonColors(currentTheme).bg
+            backgroundColor: getButtonColors(currentTheme).bg,
+            color: 'white'
           }}
         >
           {isPlaying ? (
