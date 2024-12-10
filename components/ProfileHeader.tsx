@@ -331,19 +331,19 @@ const ProfileHeader = ({
         </div>
       </div>
 
-      <div style={{ maxWidth: '300px', margin: '0 auto' }}>
-        <div style={{ display: 'none' }}>
-          <video ref={videoRef} controls style={{ width: '100%' }}>
-            <source src="/videos/setnhac.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-        <button onClick={handlePlayPause} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-          {isPlaying ? (
-            <img src="/path/to/pause-icon.png" alt="Pause" style={{ width: '24px', height: '24px' }} />
-          ) : (
-            <img src="/path/to/play-icon.png" alt="Play" style={{ width: '24px', height: '24px' }} />
-          )}
+      <div style={{ display: 'none' }}>
+        <video ref={videoRef} controls style={{ width: '100%' }}>
+          <source src="/videos/setnhac.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <button 
+          className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+          style={{
+            backgroundColor: getButtonColors(currentTheme).bg
+          }}
+          onClick={handlePlayPause}
+        >
+          {isPlaying ? 'Pause' : 'Play'}
         </button>
       </div>
 
