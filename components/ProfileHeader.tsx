@@ -318,7 +318,7 @@ const ProfileHeader = ({
         </div>
       </div>
 
-      <div style={{ display: 'none' }}>
+      <div style={{ maxWidth: '300px', margin: '0 auto' }}>
         <video controls style={{ width: '100%' }}>
           <source src="/videos/setnhac.mp4" type="video/mp4" />
           Your browser does not support the video tag.
