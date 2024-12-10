@@ -338,7 +338,10 @@ const ProfileHeader = ({
         </video>
         <button 
           onClick={handlePlayPause} 
-          className="bg-transparent border-none cursor-pointer"
+          className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+          style={{
+            backgroundColor: getButtonColors(currentTheme).bg
+          }}
         >
           {isPlaying ? (
             <i className="fas fa-pause fa-lg"></i>
