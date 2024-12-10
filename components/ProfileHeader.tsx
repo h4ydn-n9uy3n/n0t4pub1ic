@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { ThemeNames } from '../utils/themes';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
 
 interface ProfileHeaderProps {
   background: string;
@@ -91,6 +93,7 @@ const ProfileHeader = ({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
@@ -150,6 +153,42 @@ const ProfileHeader = ({
       setIsPlaying(!isPlaying);
     }
   };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaElementSource(videoRef.current);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+      analyser.fftSize = 2048;
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const draw = () => {
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d');
+        if (context) {
+          context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          const barWidth = (canvas.width / bufferLength) * 2.5;
+          let barHeight;
+          let x = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i];
+            context.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
+            context.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+            x += barWidth + 1;
+          }
+        }
+      };
+
+      draw();
+    }
+  }, [videoRef]);
 
   return (
     <div 
@@ -339,13 +378,12 @@ const ProfileHeader = ({
         <button 
           onClick={handlePlayPause} 
           className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
-          style={{
-            backgroundColor: getButtonColors(currentTheme).bg
-          }}
+          style={{ backgroundColor: getButtonColors(currentTheme).bg }}
         >
-          {isPlaying ? 'Pause' : 'Play'}
+          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
         </button>
       </div>
+      <canvas ref={canvasRef} width={300} height={100} style={{ display: isPlaying ? 'block' : 'none' }} />
 
       {selectedImage && (
         <>
