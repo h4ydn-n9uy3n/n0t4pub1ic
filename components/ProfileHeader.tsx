@@ -91,7 +91,6 @@ const ProfileHeader = ({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -138,17 +137,6 @@ const ProfileHeader = ({
   const handleOverlayClick = () => {
     setSelectedImage(null);
     onImageEnlargedChange(false);
-  };
-
-  const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
   };
 
   return (
@@ -329,30 +317,6 @@ const ProfileHeader = ({
             />
           </div>
         </div>
-      </div>
-
-      <div style={{ maxWidth: '300px', margin: '0 auto' }}>
-        <video ref={videoRef} controls style={{ width: '100%', display: 'none' }}>
-          <source src="/videos/setnhac.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-        <button 
-          onClick={handlePlayPause} 
-          className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
-          style={{
-            backgroundColor: getButtonColors(currentTheme).bg
-          }}
-        >
-          {isPlaying ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
-              <path d="M6 19h4V5H6zm8 0h4V5h-4z" /> {/* Pause icon (double lines) */}
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" /> {/* Play icon (triangle) */}
-            </svg>
-          )}
-        </button>
       </div>
 
       {selectedImage && (

@@ -29,7 +29,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Head>
-        <title>4U - A Personal Space</title>
+        <title>localhost</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main>
