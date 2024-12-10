@@ -332,7 +332,7 @@ const ProfileHeader = ({
       </div>
 
       <div style={{ maxWidth: '300px', margin: '0 auto' }}>
-        <video ref={videoRef} controls style={{ width: '100%' }}>
+        <video ref={videoRef} controls style={{ width: '100%', display: 'none' }}>
           <source src="/videos/setnhac.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
@@ -340,7 +340,11 @@ const ProfileHeader = ({
           onClick={handlePlayPause} 
           className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
         >
-          <i className="fas fa-play"></i>
+          {isPlaying ? (
+            <i className="fas fa-pause"></i>
+          ) : (
+            <i className="fas fa-play"></i>
+          )}
         </button>
       </div>
 
