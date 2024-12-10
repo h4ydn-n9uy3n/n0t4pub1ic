@@ -261,6 +261,15 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     }
   };
 
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current) return;
+    const bounds = e.currentTarget.getBoundingClientRect();
+    const percent = (e.clientX - bounds.left) / bounds.width;
+    const newTime = percent * duration;
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -281,39 +290,52 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
           </div>
         )}
       </div>
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={togglePlay}
-          className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
-            audioReady ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 cursor-wait'
-          }`}
-          disabled={!audioReady}
-          aria-label={isPlaying ? 'Pause music' : 'Play music'}
-        >
-          {isPlaying ? (
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="6" y="4" width="4" height="16" />
-              <rect x="14" y="4" width="4" height="16" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </button>
-        
-        <div className="flex-1 flex items-center space-x-2">
-          <div className="flex-1 h-12 relative">
-            <canvas
-              ref={canvasRef}
-              className="w-full h-full rounded-lg"
-              width={300}
-              height={48}
-            />
+      <div className="flex flex-col space-y-2">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={togglePlay}
+            className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+              audioReady ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 cursor-wait'
+            }`}
+            disabled={!audioReady}
+            aria-label={isPlaying ? 'Pause music' : 'Play music'}
+          >
+            {isPlaying ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            )}
+          </button>
+          
+          <div className="flex-1 flex flex-col space-y-1">
+            <div 
+              className="h-1 bg-white/10 rounded-full cursor-pointer overflow-hidden"
+              onClick={handleSeek}
+            >
+              <div 
+                className="h-full bg-white/80 transition-all duration-100"
+                style={{ width: `${(currentTime / duration) * 100}%` }}
+              />
+            </div>
+            
+            <div className="flex justify-between text-xs text-white/60">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
           </div>
-          <span className="text-xs opacity-60 min-w-[40px]">
-            {formatTime(currentTime)}
-          </span>
+        </div>
+
+        <div className="h-12 relative">
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full rounded-lg"
+            width={300}
+            height={48}
+          />
         </div>
       </div>
     </div>
