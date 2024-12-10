@@ -381,10 +381,10 @@ const ProfileHeader = ({
         </video>
         <button 
           onClick={handlePlayPause} 
-          className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500 text-white transition duration-300 ease-in-out transform hover:scale-110"
           style={{ backgroundColor: getButtonColors(currentTheme).bg }}
         >
-          <FontAwesomeIcon icon={faPlay} />
+          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} size="lg" />
         </button>
       </div>
       <canvas ref={canvasRef} width={300} height={100} style={{ display: isPlaying ? 'block' : 'none' }} />
