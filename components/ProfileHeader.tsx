@@ -95,6 +95,8 @@ const ProfileHeader = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -156,37 +158,39 @@ const ProfileHeader = ({
 
   useEffect(() => {
     if (videoRef.current) {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const analyser = audioContext.createAnalyser();
-      const source = audioContext.createMediaElementSource(videoRef.current);
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
-      analyser.fftSize = 2048;
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        analyserRef.current = audioContextRef.current.createAnalyser();
+        const source = audioContextRef.current.createMediaElementSource(videoRef.current);
+        source.connect(analyserRef.current);
+        analyserRef.current.connect(audioContextRef.current.destination);
+        analyserRef.current.fftSize = 2048;
 
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
+        const bufferLength = analyserRef.current.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
 
-      const draw = () => {
-        requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-        const canvas = canvasRef.current;
-        const context = canvas?.getContext('2d');
-        if (context) {
-          context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          const barWidth = (canvas.width / bufferLength) * 2.5;
-          let barHeight;
-          let x = 0;
-          for (let i = 0; i < bufferLength; i++) {
-            barHeight = dataArray[i];
-            context.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
-            context.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-            x += barWidth + 1;
+        const draw = () => {
+          requestAnimationFrame(draw);
+          analyserRef.current?.getByteFrequencyData(dataArray);
+          const canvas = canvasRef.current;
+          const context = canvas?.getContext('2d');
+          if (context) {
+            context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
+            for (let i = 0; i < bufferLength; i++) {
+              barHeight = dataArray[i];
+              context.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
+              context.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+              x += barWidth + 1;
+            }
           }
-        }
-      };
+        };
 
-      draw();
+        draw();
+      }
     }
   }, [videoRef]);
 
