@@ -387,7 +387,7 @@ const ProfileHeader = ({
           <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
         </button>
       </div>
-      {/* <canvas ref={canvasRef} width={300} height={100} style={{ display: isPlaying ? 'block' : 'none' }} /> */}
+      <canvas ref={canvasRef} width={300} height={100} style={{ display: isPlaying ? 'block' : 'none' }} />
 
       {selectedImage && (
         <>
