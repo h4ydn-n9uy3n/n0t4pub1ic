@@ -340,14 +340,17 @@ const ProfileHeader = ({
           onClick={handlePlayPause} 
           className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
           style={{
-            backgroundColor: getButtonColors(currentTheme).bg,
-            color: 'white'
+            backgroundColor: getButtonColors(currentTheme).bg
           }}
         >
           {isPlaying ? (
-            <i className="fas fa-pause fa-lg"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6zm8 0h4V5h-4z" /> {/* Pause icon (double lines) */}
+            </svg>
           ) : (
-            <i className="fas fa-play fa-lg"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" /> {/* Play icon (triangle) */}
+            </svg>
           )}
         </button>
       </div>
