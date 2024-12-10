@@ -90,6 +90,8 @@ const ProfileHeader = ({
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -136,6 +138,17 @@ const ProfileHeader = ({
   const handleOverlayClick = () => {
     setSelectedImage(null);
     onImageEnlargedChange(false);
+  };
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   return (
@@ -319,10 +332,13 @@ const ProfileHeader = ({
       </div>
 
       <div style={{ maxWidth: '300px', margin: '0 auto' }}>
-        <video controls style={{ width: '100%' }}>
+        <video ref={videoRef} controls style={{ width: '100%' }}>
           <source src="/videos/setnhac.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
+        <button onClick={handlePlayPause}>
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
       </div>
 
       {selectedImage && (
