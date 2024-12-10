@@ -97,6 +97,7 @@ const ProfileHeader = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const [trackTitle, setTrackTitle] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -151,6 +152,10 @@ const ProfileHeader = ({
         videoRef.current.pause();
       } else {
         videoRef.current.play();
+        setTrackTitle("Your Track Title"); // Set the title here
+        setTimeout(() => {
+          setTrackTitle(null); // Optionally hide title after a duration
+        }, 11000); // Hide after 11 seconds
       }
       setIsPlaying(!isPlaying);
     }
@@ -164,7 +169,7 @@ const ProfileHeader = ({
         const source = audioContextRef.current.createMediaElementSource(videoRef.current);
         source.connect(analyserRef.current);
         analyserRef.current.connect(audioContextRef.current.destination);
-        analyserRef.current.fftSize = 2048;
+        analyserRef.current.fftSize = 256; // Adjust FFT size for more bars
 
         const bufferLength = analyserRef.current.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -182,7 +187,10 @@ const ProfileHeader = ({
             let x = 0;
             for (let i = 0; i < bufferLength; i++) {
               barHeight = dataArray[i];
-              context.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
+              const gradient = context.createLinearGradient(x, 0, x, canvas.height);
+              gradient.addColorStop(0, 'rgba(255, 0, 0, 1)'); // Solid color at the top
+              gradient.addColorStop(1, 'rgba(255, 0, 0, 0.5)'); // Transparent at the bottom
+              context.fillStyle = gradient;
               context.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
               x += barWidth + 1;
             }
@@ -387,6 +395,7 @@ const ProfileHeader = ({
           <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
         </button>
       </div>
+      {trackTitle && <h2 style={{ textAlign: 'center' }}>{trackTitle}</h2>} {/* Title Display */}
       <canvas ref={canvasRef} width={300} height={100} style={{ display: isPlaying ? 'block' : 'none' }} />
 
       {selectedImage && (
