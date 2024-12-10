@@ -336,7 +336,13 @@ const ProfileHeader = ({
           <source src="/videos/setnhac.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        <button onClick={handlePlayPause}>
+        <button 
+          onClick={handlePlayPause} 
+          className="px-4 py-2 rounded-full w-fit text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+          style={{
+            backgroundColor: getButtonColors(currentTheme).bg
+          }}
+        >
           {isPlaying ? 'Pause' : 'Play'}
         </button>
       </div>
