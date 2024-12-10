@@ -98,6 +98,7 @@ const ProfileHeader = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const [trackTitle, setTrackTitle] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState<number>(0);
 
   useEffect(() => {
     setIsClient(true);
@@ -152,14 +153,24 @@ const ProfileHeader = ({
         videoRef.current.pause();
       } else {
         videoRef.current.play();
-        setTrackTitle("Your Track Title"); // Set the title here
+        setTrackTitle("Your Track Title");
         setTimeout(() => {
-          setTrackTitle(null); // Optionally hide title after a duration
-        }, 11000); // Hide after 11 seconds
+          setTrackTitle(null);
+        }, 11000);
       }
       setIsPlaying(!isPlaying);
     }
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (videoRef.current) {
+        setCurrentTime(videoRef.current.currentTime);
+      }
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -169,7 +180,7 @@ const ProfileHeader = ({
         const source = audioContextRef.current.createMediaElementSource(videoRef.current);
         source.connect(analyserRef.current);
         analyserRef.current.connect(audioContextRef.current.destination);
-        analyserRef.current.fftSize = 256; // Adjust FFT size for more bars
+        analyserRef.current.fftSize = 256;
 
         const bufferLength = analyserRef.current.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -180,16 +191,15 @@ const ProfileHeader = ({
           const canvas = canvasRef.current;
           const context = canvas?.getContext('2d');
           if (context) {
-            context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(0, 0, canvas.width, canvas.height);
             const barWidth = (canvas.width / bufferLength) * 2.5;
             let barHeight;
             let x = 0;
             for (let i = 0; i < bufferLength; i++) {
               barHeight = dataArray[i];
               const gradient = context.createLinearGradient(x, 0, x, canvas.height);
-              gradient.addColorStop(0, 'rgba(255, 0, 0, 1)'); // Solid color at the top
-              gradient.addColorStop(1, 'rgba(255, 0, 0, 0.5)'); // Transparent at the bottom
+              gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');
+              gradient.addColorStop(1, 'rgba(255, 0, 0, 0.5)');
               context.fillStyle = gradient;
               context.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
               x += barWidth + 1;
@@ -205,7 +215,7 @@ const ProfileHeader = ({
   return (
     <div 
       className="mt-10 mb-20 p-5 w-[700px] mx-auto rounded-xl shadow-lg animate-fadeIn transition-colors duration-300 relative z-0"
-      style={{ backgroundColor: background }}
+      style={{ backgroundColor: '#000' }}
     >
       {/* Toggle Button Container */}
       <div className={`
@@ -395,8 +405,9 @@ const ProfileHeader = ({
           <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
         </button>
       </div>
-      {trackTitle && <h2 style={{ textAlign: 'center' }}>{trackTitle}</h2>} {/* Title Display */}
-      <canvas ref={canvasRef} width={300} height={100} style={{ display: isPlaying ? 'block' : 'none' }} />
+      {trackTitle && <h2 style={{ textAlign: 'center' }}>{trackTitle}</h2>}
+      <canvas ref={canvasRef} width={300} height={100} style={{ display: 'block' }} />
+      <div style={{ textAlign: 'center' }}>Current Time: {currentTime.toFixed(2)}s</div>
 
       {selectedImage && (
         <>
