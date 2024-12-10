@@ -338,12 +338,12 @@ const ProfileHeader = ({
         </video>
         <button 
           onClick={handlePlayPause} 
-          className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+          className="bg-transparent border-none cursor-pointer"
         >
           {isPlaying ? (
-            <i className="fas fa-pause"></i>
+            <i className="fas fa-pause fa-lg"></i>
           ) : (
-            <i className="fas fa-play"></i>
+            <i className="fas fa-play fa-lg"></i>
           )}
         </button>
       </div>
