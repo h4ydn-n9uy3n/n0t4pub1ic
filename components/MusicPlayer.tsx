@@ -58,15 +58,6 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       setError(null);
     };
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      if (audio.currentTime >= 12) {
-        setShowTitle(true);
-      } else {
-        setShowTitle(false);
-      }
-    };
-
     const handleLoadedMetadata = () => {
       console.log('Audio metadata loaded');
       setDuration(audio.duration);
@@ -127,7 +118,6 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('loadeddata', handleLoadedData);
     audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
@@ -139,7 +129,6 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.removeEventListener('loadeddata', handleLoadedData);
       audio.removeEventListener('canplay', handleCanPlay);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
@@ -354,7 +343,6 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
             ref={audioRef} 
             controls 
             style={{ width: '100%', borderRadius: '15px' }} 
-            onTimeUpdate={handleTimeUpdate}
           >
             <source src="/nhac.mp3" type="audio/mpeg" />
             Your browser does not support the audio element.
