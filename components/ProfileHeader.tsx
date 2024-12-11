@@ -91,10 +91,6 @@ const ProfileHeader = ({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showTitle, setShowTitle] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
 
   const titleAnimation = {
     entering: 'opacity-0 transform -translate-y-2',
@@ -109,50 +105,7 @@ const ProfileHeader = ({
     if (savedImage) {
       setProfileImage(savedImage);
     }
-
-    // Initialize audio player
-    const audio = audioRef.current;
-    if (audio) {
-      const handleMetadata = () => {
-        const audioDuration = audio.duration;
-        console.log('Audio duration loaded:', audioDuration);
-        setDuration(audioDuration);
-      };
-
-      const handleTimeUpdate = () => {
-        const currentAudioTime = audio.currentTime;
-        console.log('Audio current time:', currentAudioTime, 'Duration:', audio.duration);
-        setCurrentTime(currentAudioTime);
-        
-        // Show title after 11 seconds
-        console.log('Checking title visibility:', currentAudioTime);
-        if (currentAudioTime >= 11 && !showTitle) {
-          console.log('Showing title');
-          setShowTitle(true);
-        } else if (currentAudioTime < 11 && showTitle) {
-          console.log('Hiding title');
-          setShowTitle(false);
-        }
-      };
-
-      audio.addEventListener('loadedmetadata', handleMetadata);
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      
-      // Force load metadata
-      audio.load();
-
-      return () => {
-        audio.removeEventListener('loadedmetadata', handleMetadata);
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-      };
-    }
   }, []);
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -198,28 +151,6 @@ const ProfileHeader = ({
     onImageEnlargedChange(false);
   };
 
-  const togglePlayPause = () => { 
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play().catch(error => {
-          console.error('Error playing audio:', error);
-        });
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current) return;
-    const bounds = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - bounds.left) / bounds.width;
-    const newTime = percent * duration;
-    audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-
   return (
     <div 
       className="mt-10 mb-20 p-5 w-[700px] mx-auto rounded-xl shadow-lg animate-fadeIn transition-colors duration-300 relative z-0"
@@ -231,74 +162,18 @@ const ProfileHeader = ({
         transition-all duration-300
         ${selectedImage ? 'opacity-30 pointer-events-none blur-sm z-[-1]' : ''}
       `}>
-        {/* Audio Player */}
-        <div style={{ width: '260px', borderRadius: '15px' }}>
-          <audio 
-            ref={audioRef} 
-            preload="metadata"
-            style={{ display: 'none' }}
-          >
-            <source src="/nhac.mp3" type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
-          <div className="mt-4 w-full space-y-2">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={togglePlayPause}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg"
-                aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-              >
-                {isPlaying ? (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-              
-              <div className="flex-1 flex flex-col space-y-1" style={{ minWidth: '200px' }}>
-                <div className="h-5 overflow-hidden"> 
-                  <div
-                    className={`text-xs font-medium text-553e4e/80 transform transition-all duration-300 ease-out
-                      ${showTitle ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full'}`}
-                  >
-                    SET NHAC DANH CHO MY NHAN
-                  </div>
-                </div>
-                <div 
-                  className="h-1.5 bg-white/10 rounded-full cursor-pointer overflow-hidden"
-                  onClick={handleSeek}
-                >
-                  <div
-                    className="h-full bg-553e4e"
-                    style={{ width: `${(currentTime / duration) * 100}%` }}
-                  />
-                </div>
-                
-                <div className="flex justify-between text-sm text-553e4e/80">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Switch Image Button Section */}
-      <div 
-        className="absolute bottom-4 right-4 z-10 p-2 rounded-full shadow-lg transition-colors duration-300"
-        style={{ backgroundColor: getButtonColors(currentTheme).bg }}
-      >
-        <button
-          onClick={toggleImageSet}
-          className="bg-553e4e/20 hover:bg-553e4e/30 text-553e4e font-bold px-3 py-1 rounded-full text-sm transition-colors"
+        {/* Switch Image Button Section */}
+        <div 
+          className="absolute bottom-4 right-4 z-10 p-2 rounded-full shadow-lg transition-colors duration-300"
+          style={{ backgroundColor: getButtonColors(currentTheme).bg }}
         >
-          Switch Image Set
-        </button>
+          <button
+            onClick={toggleImageSet}
+            className="bg-553e4e/20 hover:bg-553e4e/30 text-553e4e font-bold px-3 py-1 rounded-full text-sm transition-colors"
+          >
+            Switch Image Set
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col">
