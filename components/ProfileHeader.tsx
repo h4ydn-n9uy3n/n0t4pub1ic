@@ -164,12 +164,12 @@ const ProfileHeader = ({
       `}>
         {/* Switch Image Button Section */}
         <div 
-          className="absolute bottom-4 right-4 z-10 p-4 rounded-lg shadow-lg transition-colors duration-300 flex justify-center items-center"
+          className="absolute bottom-4 right-4 z-10 p-2 rounded-md shadow-lg transition-colors duration-300"
           style={{ backgroundColor: getButtonColors(currentTheme).bg }}
         >
           <button
             onClick={toggleImageSet}
-            className="bg-553e4e/20 hover:bg-553e4e/30 text-553e4e font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+            className="bg-553e4e/20 hover:bg-553e4e/30 text-553e4e font-bold px-10 py-1 rounded-md text-sm transition-colors"
           >
             Switch Image Set
           </button>
