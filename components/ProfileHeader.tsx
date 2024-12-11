@@ -158,7 +158,7 @@ const ProfileHeader = ({
     >
       {/* Toggle Button Container */}
       <div className={`
-        absolute top-4 right-4 flex flex-col items-end space-y-4 z-10
+        absolute bottom-4 right-4 flex flex-col items-end space-y-4 z-10
         transition-all duration-300
         ${selectedImage ? 'opacity-30 pointer-events-none blur-sm z-[-1]' : ''}
       `}>
