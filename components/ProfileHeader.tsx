@@ -74,6 +74,19 @@ const getButtonColors = (theme: ThemeNames) => {
   }
 };
 
+const getAudioPlayerColors = (theme: string) => {
+  switch (theme) {
+    case 'happy':
+      return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
+    case 'sad':
+      return { button: '#553e4e', progress: '#c8b6ff', progressFill: '#553e4e' };
+    case 'energetic':
+      return { button: '#ff8fab', progress: '#ffc2d1', progressFill: '#ff8fab' };
+    default:
+      return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
+  }
+};
+
 const ProfileHeader = ({ 
   background = '#ffd1dc',
   textColor = '#553E4E',
@@ -165,6 +178,22 @@ const ProfileHeader = ({
     return '0:00';
   };
 
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const clickPosition = e.clientX - rect.left;
+    const percentage = clickPosition / rect.width;
+    
+    if (audio.duration) {
+      const newTime = percentage * audio.duration;
+      audio.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
   const togglePlayPause = () => {
     if (audioRef.current) {
       if (isPlaying) {
@@ -180,23 +209,31 @@ const ProfileHeader = ({
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio) {
-      const handleTimeUpdate = () => {
-        setCurrentTime(audio.currentTime);
-      };
+    if (!audio) return;
 
-      const handleLoadedMetadata = () => {
-        setDuration(audio.duration);
-      };
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
 
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    const handleLoadedData = () => {
+      setDuration(audio.duration);
+      setCurrentTime(0);
+    };
 
-      return () => {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      };
-    }
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadeddata', handleLoadedData);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadeddata', handleLoadedData);
+      audio.removeEventListener('ended', handleEnded);
+    };
   }, []);
 
   return (
@@ -215,7 +252,6 @@ const ProfileHeader = ({
           <audio 
             ref={audioRef} 
             preload="metadata"
-            style={{ display: 'none' }}
           >
             <source src="/nhac.mp3" type="audio/mpeg" />
             Your browser does not support the audio element.
@@ -224,7 +260,8 @@ const ProfileHeader = ({
           <div className="flex items-center space-x-4">
             <button
               onClick={togglePlayPause}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#553e4e] hover:bg-[#553e4e] text-white shadow-lg transition-all duration-300"
+              className="w-10 h-10 flex items-center justify-center rounded-full text-white shadow-lg transition-all duration-300"
+              style={{ backgroundColor: getAudioPlayerColors(currentTheme).button }}
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
@@ -232,17 +269,24 @@ const ProfileHeader = ({
                   <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
               ) : (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="#ffffff" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z"/>
                 </svg>
               )}
             </button>
             
-            <div className="flex flex-col space-y-1" style={{ minWidth: '150px' }}>
-              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="flex flex-col space-y-1" style={{ minWidth: '190px' }}>
+              <div 
+                className="h-1.5 rounded-full overflow-hidden cursor-pointer transition-all duration-300"
+                onClick={handleProgressClick}
+                style={{ backgroundColor: getAudioPlayerColors(currentTheme).progress }}
+              >
                 <div
-                  className="h-full bg-[#ffcfd2]"
-                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                  className="h-full transition-all duration-300"
+                  style={{ 
+                    width: `${(currentTime / duration) * 100}%`,
+                    backgroundColor: getAudioPlayerColors(currentTheme).progressFill
+                  }}
                 />
               </div>
               <div className="flex justify-between text-xs text-gray-500">
