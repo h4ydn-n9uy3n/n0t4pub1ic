@@ -94,6 +94,7 @@ const ProfileHeader = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const titleAnimation = {
     entering: 'opacity-0 transform -translate-y-2',
@@ -154,9 +155,49 @@ const ProfileHeader = ({
     onImageEnlargedChange(false);
   };
 
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  // Format time in minutes:seconds
+  const formatTime = (time: number) => {
+    if (time && !isNaN(time)) {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+    return '0:00';
   };
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(error => {
+          console.error('Error playing audio:', error);
+        });
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      const handleTimeUpdate = () => {
+        setCurrentTime(audio.currentTime);
+      };
+
+      const handleLoadedMetadata = () => {
+        setDuration(audio.duration);
+      };
+
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+      return () => {
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
+    }
+  }, []);
 
   return (
     <div 
@@ -169,16 +210,49 @@ const ProfileHeader = ({
         transition-all duration-300
         ${selectedImage ? 'opacity-30 pointer-events-none blur-sm z-[-1]' : ''}
       `}>
-        {/* Play/Pause Button */}
-        <div className="flex flex-col items-end space-y-2">
-          <button onClick={togglePlayPause} className="bg-blue-500 text-white p-2 rounded">
-            {isPlaying ? 'Pause' : 'Play'}
-          </button>
-          <div className="flex items-center">
-            <span>{Math.floor(currentTime)} / {Math.floor(duration)}</span>
-            <input type="range" value={currentTime} max={duration} className="mx-2" />
+        {/* Music Player */}
+        <div className="flex flex-col items-end space-y-2 mb-4">
+          <audio 
+            ref={audioRef} 
+            preload="metadata"
+            style={{ display: 'none' }}
+          >
+            <source src="/nhac.mp3" type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+          
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={togglePlayPause}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 text-white shadow-lg transition-all duration-300"
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              )}
+            </button>
+            
+            <div className="flex flex-col space-y-1" style={{ minWidth: '150px' }}>
+              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-pink-500 to-violet-500"
+                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
           </div>
         </div>
+
         {/* Switch Image Button Section */}
         <button
           onClick={toggleImageSet}
