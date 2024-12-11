@@ -94,7 +94,6 @@ const ProfileHeader = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   const titleAnimation = {
     entering: 'opacity-0 transform -translate-y-2',
@@ -155,42 +154,9 @@ const ProfileHeader = ({
     onImageEnlargedChange(false);
   };
 
-  // Format time in minutes:seconds
-  const formatTime = (time: number) => {
-    if (time && !isNaN(time)) {
-      const minutes = Math.floor(time / 60);
-      const seconds = Math.floor(time % 60);
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-    return '0:00';
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
   };
-
-  const handlePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play().catch(error => {
-          console.error('Error playing audio:', error);
-        });
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.addEventListener('loadedmetadata', () => {
-        setDuration(audioRef.current?.duration || 0);
-      });
-    }
-  }, []);
 
   return (
     <div 
@@ -203,44 +169,16 @@ const ProfileHeader = ({
         transition-all duration-300
         ${selectedImage ? 'opacity-30 pointer-events-none blur-sm z-[-1]' : ''}
       `}>
-        {/* Music Player Section */}
-        <div className="flex flex-col items-end space-y-2 mb-4">
-          <audio
-            ref={audioRef}
-            src="/nhac.mp3"
-            onTimeUpdate={handleTimeUpdate}
-          />
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handlePlayPause}
-              className="bg-553e4e/20 hover:bg-553e4e/30 text-553e4e p-2 rounded-full transition-colors"
-              aria-label={isPlaying ? 'Pause' : 'Play'}
-            >
-              {isPlaying ? (
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                </svg>
-              ) : (
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              )}
-            </button>
-            <div className="flex flex-col space-y-1">
-              <div className="w-48 h-1 bg-553e4e/20 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-553e4e/40"
-                  style={{ width: `${(currentTime / duration) * 100}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-553e4e">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
-              </div>
-            </div>
+        {/* Play/Pause Button */}
+        <div className="flex flex-col items-end space-y-2">
+          <button onClick={togglePlayPause} className="bg-blue-500 text-white p-2 rounded">
+            {isPlaying ? 'Pause' : 'Play'}
+          </button>
+          <div className="flex items-center">
+            <span>{Math.floor(currentTime)} / {Math.floor(duration)}</span>
+            <input type="range" value={currentTime} max={duration} className="mx-2" />
           </div>
         </div>
-
         {/* Switch Image Button Section */}
         <button
           onClick={toggleImageSet}
