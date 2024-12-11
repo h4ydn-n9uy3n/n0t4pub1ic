@@ -75,12 +75,13 @@ const VideoUpload = ({
             <div className="w-full relative">
               <div className="relative group/video">
                 <div style={{ width: '100%', borderRadius: '15px' }}>
-                  <div className="mt-4 w-full space-y-2">
+                  <div className="w-full">
                     <video
                       ref={videoRef}
                       controls
                       className="w-full rounded-lg"
                       src={videoUrl}
+                      style={{ marginTop: 0 }}
                     >
                       {videoError || 'Your browser does not support the video tag.'}
                     </video>
