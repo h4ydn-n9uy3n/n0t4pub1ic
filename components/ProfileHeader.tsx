@@ -91,7 +91,6 @@ const ProfileHeader = ({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showTitle, setShowTitle] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
