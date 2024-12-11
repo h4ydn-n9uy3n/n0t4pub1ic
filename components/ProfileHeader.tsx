@@ -224,7 +224,7 @@ const ProfileHeader = ({
           <div className="flex items-center space-x-4">
             <button
               onClick={togglePlayPause}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 text-white shadow-lg transition-all duration-300"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#553e4e] hover:bg-[#553e4e] text-white shadow-lg transition-all duration-300"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
@@ -241,7 +241,7 @@ const ProfileHeader = ({
             <div className="flex flex-col space-y-1" style={{ minWidth: '150px' }}>
               <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-pink-500 to-violet-500"
+                  className="h-full bg-[#ffcfd2]"
                   style={{ width: `${(currentTime / duration) * 100}%` }}
                 />
               </div>
