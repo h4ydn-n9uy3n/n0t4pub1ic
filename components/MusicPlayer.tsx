@@ -11,14 +11,14 @@ interface MusicPlayerProps {
 }
 
 const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [audioReady, setAudioReady] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>();
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -276,6 +276,17 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
   return (
     <div className={`flex flex-col space-y-4 ${className}`}>
       <div className="h-5">
@@ -336,6 +347,22 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
             width={300}
             height={48}
           />
+        </div>
+
+        <div style={{ width: '100%', borderRadius: '15px', overflow: 'hidden' }}>
+          <audio 
+            ref={audioRef} 
+            controls 
+            style={{ width: '100%', borderRadius: '15px' }} 
+            onTimeUpdate={handleTimeUpdate}
+          >
+            <source src="/nhac.mp3" type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+          <button onClick={togglePlayPause} className="mt-2">
+            {isPlaying ? 'Pause' : 'Play'}
+          </button>
+          <div>Current Time: {currentTime.toFixed(2)}s</div>
         </div>
       </div>
     </div>

@@ -114,26 +114,29 @@ const VideoUpload = ({
           {isClient && videoUrl ? (
             <div className="w-full relative">
               <div className="relative group/video">
-                <video 
-                  ref={videoRef}
-                  key={videoUrl}
-                  className="w-full h-[400px] object-cover"
-                  style={{
-                    display: 'none',
-                    marginBottom: '-6px',
-                  }}
-                  onError={(e) => {
-                    console.error('Video error:', e);
-                    setVideoError('Error loading video');
-                  }}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  controlsList="nodownload"
-                >
-                  <source src={videoUrl} type="video/quicktime" />
-                  <source src={videoUrl} type="video/mp4" />
-                  {videoError || 'Your browser does not support the video tag.'}
-                </video>
+                <div style={{ width: '100%', borderRadius: '15px' }}>
+                  <video 
+                    ref={videoRef}
+                    key={videoUrl}
+                    className="w-full h-[400px] object-cover"
+                    style={{
+                      display: 'block',
+                      marginBottom: '-6px',
+                      borderRadius: '15px'
+                    }}
+                    onError={(e) => {
+                      console.error('Video error:', e);
+                      setVideoError('Error loading video');
+                    }}
+                    onTimeUpdate={handleTimeUpdate}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    controlsList="nodownload"
+                  >
+                    <source src={videoUrl} type="video/quicktime" />
+                    <source src={videoUrl} type="video/mp4" />
+                    {videoError || 'Your browser does not support the video tag.'}
+                  </video>
+                </div>
 
                 {/* Play/Pause overlay */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/video:opacity-100 transition-opacity">
