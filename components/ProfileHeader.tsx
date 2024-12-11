@@ -163,17 +163,13 @@ const ProfileHeader = ({
         ${selectedImage ? 'opacity-30 pointer-events-none blur-sm z-[-1]' : ''}
       `}>
         {/* Switch Image Button Section */}
-        <div 
-          className="absolute bottom-4 right-4 z-10 p-2 rounded-md shadow-lg transition-colors duration-300"
+        <button
+          onClick={toggleImageSet}
+          className="bg-553e4e/20 hover:bg-553e4e/30 text-553e4e font-bold px-6 py-2 rounded-lg text-sm transition-colors shadow-lg"
           style={{ backgroundColor: getButtonColors(currentTheme).bg }}
         >
-          <button
-            onClick={toggleImageSet}
-            className="bg-553e4e/20 hover:bg-553e4e/30 text-553e4e font-bold px-10 py-1 rounded-md text-sm transition-colors"
-          >
-            Switch Image Set
-          </button>
-        </div>
+          Switch Image Set
+        </button>
       </div>
 
       <div className="flex flex-col">
