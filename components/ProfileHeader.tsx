@@ -245,16 +245,18 @@ const ProfileHeader = ({
             <div className="flex items-center space-x-4">
               <button
                 onClick={togglePlayPause}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg"
                 aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
               >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  {isPlaying ? (
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  ) : (
-                    <path d="M8 5v14l11-7z"/>
-                  )}
-                </svg>
+                {isPlaying ? (
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
               </button>
               
               <div className="flex-1 flex flex-col space-y-1" style={{ minWidth: '200px' }}>
