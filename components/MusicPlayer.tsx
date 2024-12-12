@@ -9,13 +9,29 @@ interface MusicPlayerProps {
   audioFiles: AudioFile[];
   className?: string;
 }
+const getPlayerColors = (mood: string) => {
+  switch (mood) {
+    case 'happy':
+      return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
+    case 'calm':
+      return { button: '#553e4e', progress: '#c8b6ff', progressFill: '#553e4e' };
+    case 'energetic':
+      return { button: '#ff8fab', progress: '#ffc2d1', progressFill: '#ff8fab' };
+    default:
+      return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
+  }
+};
 
 const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
   const [duration, setDuration] = useState(0);
   const [audioReady, setAudioReady] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentMood, setCurrentMood] = useState('happy'); // or whatever default mood you want
   
+  const changeMood = (newMood: string) => {
+    setCurrentMood(newMood);
+  };
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -293,19 +309,17 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       <div className="flex flex-col space-y-2">
         <div className="flex items-center space-x-4">
           <button
-            onClick={togglePlay}
-            className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
-              audioReady ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 cursor-wait'
-            }`}
-            disabled={!audioReady}
-            aria-label={isPlaying ? 'Pause music' : 'Play music'}
+            onClick={togglePlayPause}
+            className="w-10 h-10 flex items-center justify-center rounded-full text-white shadow-lg transition-all duration-300"
+            style={{ backgroundColor: getPlayerColors(currentMood).button }} // Use mood-based color
+            aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="#ffffff" viewBox="0 0 24 24">
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
               </svg>
             ) : (
-              <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="#553e4e" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
               </svg>
             )}
@@ -313,12 +327,16 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
           
           <div className="flex-1 flex flex-col space-y-1">
             <div 
-              className="h-1 bg-white/10 rounded-full cursor-pointer overflow-hidden"
-              onClick={handleSeek}
+              className="h-1 rounded-full overflow-hidden cursor-pointer transition-all duration-300"
+              onClick={handleProgressClick} // Ensure this matches your click handler
+              style={{ backgroundColor: getPlayerColors(currentMood).progress }} // Use mood-based color
             >
               <div 
-                className="h-full bg-white/80 transition-all duration-100"
-                style={{ width: `${(currentTime / duration) * 100}%` }}
+                className="h-full transition-all duration-300"
+                style={{ 
+                  width: `${(currentTime / duration) * 100}%`,
+                  backgroundColor: getPlayerColors(currentMood).progressFill // Use mood-based fill color
+                }}
               />
             </div>
             

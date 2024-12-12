@@ -78,10 +78,22 @@ const getAudioPlayerColors = (theme: string) => {
   switch (theme) {
     case 'happy':
       return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
-    case 'sad':
-      return { button: '#553e4e', progress: '#c8b6ff', progressFill: '#553e4e' };
+    case 'blessed':
+      return { button: '#4ECDC4', progress: '#E6CDAA', progressFill: '#4ECDC4' };
+    case 'calm':
+      return { button: '#98C1D9', progress: '#AEE8E4', progressFill: '#98C1D9' };
+    case 'romantic':
+      return { button: '#FFB5E8', progress: '#C48793', progressFill: '#FFB5E8' };
+    case 'dreamy':
+      return { button: '#B8B8FF', progress: '#D6CFE7', progressFill: '#B8B8FF' };
+    case 'cozy':
+      return { button: '#D4A373', progress: '#D6A18A', progressFill: '#D4A373' };
+    case 'peaceful':
+      return { button: '#A8E6CF', progress: '#B3D4E0', progressFill: '#A8E6CF' };
+    case 'loved':
+      return { button: '#FF6B6B', progress: '#FFB6C1', progressFill: '#FF6B6B' };
     case 'energetic':
-      return { button: '#ff8fab', progress: '#ffc2d1', progressFill: '#ff8fab' };
+      return { button: '#F7B267', progress: '#FFD700', progressFill: '#F7B267' };
     default:
       return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
   }
