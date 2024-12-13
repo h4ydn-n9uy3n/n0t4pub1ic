@@ -79,21 +79,21 @@ const getAudioPlayerColors = (theme: string) => {
     case 'happy':
       return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
     case 'blessed':
-      return { button: '#4ECDC4', progress: '#E6CDAA', progressFill: '#4ECDC4' };
+      return { button: '#4ECDC4', progress: '#e8fff8', progressFill: '#4ECDC4' };
     case 'calm':
-      return { button: '#98C1D9', progress: '#AEE8E4', progressFill: '#98C1D9' };
+      return { button: '#98C1D9', progress: '#e3f6f5', progressFill: '#98C1D9' };
     case 'romantic':
-      return { button: '#FFB5E8', progress: '#C48793', progressFill: '#FFB5E8' };
+      return { button: '#FFB5E8', progress: '#f3e8ff', progressFill: '#FFB5E8' };
     case 'dreamy':
-      return { button: '#B8B8FF', progress: '#D6CFE7', progressFill: '#B8B8FF' };
+      return { button: '#B8B8FF', progress: '#e0f4ff', progressFill: '#B8B8FF' };
     case 'cozy':
-      return { button: '#D4A373', progress: '#D6A18A', progressFill: '#D4A373' };
+      return { button: '#D4A373', progress: '#fff8ea', progressFill: '#D4A373' };
     case 'peaceful':
-      return { button: '#A8E6CF', progress: '#B3D4E0', progressFill: '#A8E6CF' };
+      return { button: '#A8E6CF', progress: '#f0f9f9', progressFill: '#A8E6CF' };
     case 'loved':
-      return { button: '#FF6B6B', progress: '#FFB6C1', progressFill: '#FF6B6B' };
+      return { button: '#FF6B6B', progress: '#ffe6e6', progressFill: '#FF6B6B' };
     case 'energetic':
-      return { button: '#F7B267', progress: '#FFD700', progressFill: '#F7B267' };
+      return { button: '#F7B267', progress: '#fff3b0', progressFill: '#F7B267' };
     default:
       return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
   }
@@ -281,7 +281,7 @@ const ProfileHeader = ({
                   <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
               ) : (
-                <svg className="w-5 h-5" fill="#ffffff" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="#553E4E" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z"/>
                 </svg>
               )}
