@@ -4,6 +4,7 @@ import { ThemeNames } from '../utils/themes';
 interface AudioFile {
   url: string;
   title: string;
+  duration: number; // Add duration property to AudioFile interface
 }
 
 interface MusicPlayerProps {
@@ -92,7 +93,6 @@ const MusicPlayer = ({ audioFiles, className = '', currentTheme }: MusicPlayerPr
 
     const handleLoadedMetadata = () => {
       console.log('Audio metadata loaded');
-      setDuration(audio.duration);
       setError(null);
     };
 
@@ -147,13 +147,12 @@ const MusicPlayer = ({ audioFiles, className = '', currentTheme }: MusicPlayerPr
 
     const handleTimeUpdate = () => {
       if (!audioRef.current) return;
-      setCurrentTime(audioRef.current.currentTime);
-      // Show title after 11 seconds without affecting playback
-      if (audioRef.current.currentTime >= 11) {
-        setShowTitle(true);
-      } else {
-        setShowTitle(false);
-      }
+      
+      const currentTime = audioRef.current.currentTime;
+      console.log('Current Time:', currentTime, 'Show Title:', currentTime >= 11);
+      
+      setCurrentTime(currentTime);
+      setShowTitle(currentTime >= 11);
     };
 
     // Add event listeners
@@ -164,6 +163,16 @@ const MusicPlayer = ({ audioFiles, className = '', currentTheme }: MusicPlayerPr
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
     audio.addEventListener('timeupdate', handleTimeUpdate);
+
+    useEffect(() => {
+      if (audioRef.current) {
+        audioRef.current.addEventListener('loadedmetadata', () => {
+          if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+          }
+        });
+      }
+    }, [audioFiles]);
 
     // Initial load
     audio.load();
