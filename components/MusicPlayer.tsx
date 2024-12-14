@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { ThemeNames } from '../utils/themes';
 
 interface AudioFile {
   url: string;
@@ -8,32 +9,47 @@ interface AudioFile {
 interface MusicPlayerProps {
   audioFiles: AudioFile[];
   className?: string;
+  currentTheme: ThemeNames;
 }
-const getPlayerColors = (mood: string) => {
-  switch (mood) {
+
+const getPlayerColors = (theme: ThemeNames) => {
+  switch (theme) {
     case 'happy':
       return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
+    case 'blessed':
+      return { button: '#4ECDC4', progress: '#e8fff8', progressFill: '#4ECDC4' };
     case 'calm':
-      return { button: '#553e4e', progress: '#c8b6ff', progressFill: '#553e4e' };
+      return { button: '#98C1D9', progress: '#e3f6f5', progressFill: '#98C1D9' };
+    case 'romantic':
+      return { button: '#FFB5E8', progress: '#f3e8ff', progressFill: '#FFB5E8' };
+    case 'dreamy':
+      return { button: '#B8B8FF', progress: '#e0f4ff', progressFill: '#B8B8FF' };
+    case 'cozy':
+      return { button: '#D4A373', progress: '#fff8ea', progressFill: '#D4A373' };
+    case 'peaceful':
+      return { button: '#A8E6CF', progress: '#f0f9f9', progressFill: '#A8E6CF' };
+    case 'loved':
+      return { button: '#FF6B6B', progress: '#ffe6e6', progressFill: '#FF6B6B' };
     case 'energetic':
-      return { button: '#ff8fab', progress: '#ffc2d1', progressFill: '#ff8fab' };
+      return { button: '#F7B267', progress: '#fff3b0', progressFill: '#F7B267' };
     default:
       return { button: '#e0479e', progress: '#ffcfd2', progressFill: '#e0479e' };
   }
 };
 
-const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
+const MusicPlayer = ({ audioFiles, className = '', currentTheme }: MusicPlayerProps) => {
   const [duration, setDuration] = useState(0);
   const [audioReady, setAudioReady] = useState(false);
-  const [showTitle, setShowTitle] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentMood, setCurrentMood] = useState('happy'); // or whatever default mood you want
+  const [showTitle, setShowTitle] = useState(false);
   
-  const changeMood = (newMood: string) => {
-    setCurrentMood(newMood);
+  const changeTheme = (newTheme: ThemeNames) => {
+    // Add logic to change theme here
   };
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPausing, setIsPausing] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>();
@@ -83,7 +99,6 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
-      setShowTitle(false);
       audio.currentTime = 0;
     };
 
@@ -130,6 +145,17 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       }
     };
 
+    const handleTimeUpdate = () => {
+      if (!audioRef.current) return;
+      setCurrentTime(audioRef.current.currentTime);
+      // Show title after 11 seconds without affecting playback
+      if (audioRef.current.currentTime >= 11) {
+        setShowTitle(true);
+      } else {
+        setShowTitle(false);
+      }
+    };
+
     // Add event listeners
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('loadeddata', handleLoadedData);
@@ -137,6 +163,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
 
     // Initial load
     audio.load();
@@ -148,6 +175,7 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
       
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -160,6 +188,12 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       audio.load();
     };
   }, [audioFiles]);
+
+  useEffect(() => {
+    if (audioReady) {
+      return () => {};
+    }
+  }, [audioReady]);
 
   const initAudioContext = async () => {
     if (!audioRef.current) return;
@@ -208,12 +242,15 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     const barWidth = (canvas.width / bufferLength) * 2.5;
     let x = 0;
 
+    // Get theme colors for visualizer
+    const colors = getPlayerColors(currentTheme);
+    
     for (let i = 0; i < bufferLength; i++) {
       const barHeight = (dataArray[i] / 255) * canvas.height;
       
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
+      gradient.addColorStop(0, `${colors.button}cc`); // 80% opacity
+      gradient.addColorStop(1, `${colors.button}33`); // 20% opacity
       
       ctx.fillStyle = gradient;
       ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
@@ -244,10 +281,10 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
+        setIsPausing(true);
       } else {
         if (audioRef.current.ended) {
           audioRef.current.currentTime = 0;
-          setShowTitle(false);
         }
 
         // Resume audio context if suspended
@@ -257,12 +294,28 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
 
         await audioRef.current.play();
         setIsPlaying(true);
+        setIsPausing(false);
         setError(null);
       }
     } catch (error) {
       console.error('Error toggling playback:', error);
       setError('Error playing audio');
       setIsPlaying(false);
+      setIsPausing(true);
+    }
+  };
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        setIsPausing(true);
+      } else {
+        audioRef.current.play();
+        setIsPlaying(true);
+        setIsPausing(false);
+      }
     }
   };
 
@@ -281,94 +334,91 @@ const MusicPlayer = ({ audioFiles, className = '' }: MusicPlayerProps) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const togglePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
   return (
-    <div className={`flex flex-col space-y-4 ${className}`}>
-      <div className="h-5">
-        {showTitle && (
-          <div className="text-center text-sm text-white/80 font-medium animate-fade-in">
-            {audioFiles[0].title}
-          </div>
-        )}
-        {error && (
-          <div className="text-center text-sm text-red-400 font-medium animate-fade-in">
-            {error}
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col space-y-2">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={togglePlayPause}
-            className="w-10 h-10 flex items-center justify-center rounded-full text-white shadow-lg transition-all duration-300"
-            style={{ backgroundColor: getPlayerColors(currentMood).button }} // Use mood-based color
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying ? (
-              <svg className="w-5 h-5" fill={getPlayerColors(currentMood).button} viewBox="0 0 24 24">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill={getPlayerColors(currentMood).button} viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            )}
-          </button>
-          
-          <div className="flex-1 flex flex-col space-y-1">
+    <div className={`relative w-full max-w-md mx-auto ${className}`}>
+      <div className="relative w-full bg-opacity-20 rounded-lg overflow-hidden">
+        <div className="h-5">
+          {error && (
+            <div className="text-center text-sm text-red-400 font-medium animate-fade-in">
+              {error}
+            </div>
+          )}
+          {showTitle && (
             <div 
-              className="h-1 rounded-full overflow-hidden cursor-pointer transition-all duration-300"
-              onClick={handleProgressClick} // Ensure this matches your click handler
-              style={{ backgroundColor: getPlayerColors(currentMood).progress }} // Use mood-based color
+              className="text-center text-lg font-bold"
+              style={{ 
+                color: getPlayerColors(currentTheme).button
+              }}
             >
-              <div 
-                className="h-full transition-all duration-300"
-                style={{ 
-                  width: `${(currentTime / duration) * 100}%`,
-                  backgroundColor: getPlayerColors(currentMood).progressFill // Use mood-based fill color
-                }}
-              />
+              SET NHAC DANH CHO MY NHAN
+              {isPausing && <span className="ml-2">(Paused)</span>}
             </div>
+          )}
+        </div>
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={togglePlayPause}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-white shadow-lg transition-all duration-300"
+              style={{ backgroundColor: getPlayerColors(currentTheme).button }}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              )}
+            </button>
             
-            <div className="flex justify-between text-xs text-white/60">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
+            <div className="flex-1 flex flex-col space-y-1">
+              <div 
+                className="h-1 rounded-full overflow-hidden cursor-pointer transition-all duration-300"
+                onClick={handleSeek} // Ensure this matches your click handler
+                style={{ backgroundColor: getPlayerColors(currentTheme).progress }} // Use theme-based color
+              >
+                <div 
+                  className="h-full transition-all duration-300"
+                  style={{ 
+                    width: `${(currentTime / duration) * 100}%`,
+                    backgroundColor: getPlayerColors(currentTheme).progressFill // Use theme-based fill color
+                  }}
+                />
+              </div>
+              
+              <div className="flex justify-between text-xs text-white/60">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="h-12 relative">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full rounded-lg"
-            width={300}
-            height={48}
-          />
-        </div>
+          <div className="h-12 relative">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full rounded-lg"
+              width={300}
+              height={48}
+            />
+          </div>
 
-        <div style={{ width: '100%', borderRadius: '15px', overflow: 'hidden' }}>
-          <audio 
-            ref={audioRef} 
-            controls 
-            style={{ width: '100%', borderRadius: '15px' }} 
-          >
-            <source src="/nhac.mp3" type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
-          <button onClick={togglePlayPause} className="mt-2">
-            {isPlaying ? 'Pause' : 'Play'}
-          </button>
-          <div>Current Time: {currentTime.toFixed(2)}s</div>
+          <div style={{ width: '100%', borderRadius: '15px', overflow: 'hidden' }}>
+            <audio 
+              ref={audioRef} 
+              controls 
+              style={{ width: '100%', borderRadius: '15px' }} 
+            >
+              <source src="/nhac.mp3" type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+            <button onClick={togglePlayPause} className="mt-2">
+              {isPlaying ? 'Pause' : 'Play'}
+            </button>
+            <div>Current Time: {currentTime.toFixed(2)}s</div>
+          </div>
         </div>
       </div>
     </div>
