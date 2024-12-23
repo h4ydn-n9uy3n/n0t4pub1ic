@@ -41,3 +41,50 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Progress Bar Styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Progress Bar Track */
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #4a4a4a;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* Progress Bar Fill */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  background-color: var(--mood-color, #1DB954);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+}
+
+/* Firefox styles */
+input[type="range"]::-moz-range-track {
+  background: #4a4a4a;
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  border-radius: 50%;
+  background-color: var(--mood-color, #1DB954);
+  height: 16px;
+  width: 16px;
+}
+
+input[type="range"]::-moz-range-progress {
+  background-color: var(--mood-color, #1DB954);
+  height: 4px;
+  border-radius: 2px;
+}
