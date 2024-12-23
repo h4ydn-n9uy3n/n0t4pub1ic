@@ -7,6 +7,20 @@
 /* Tailwind utility classes */
 @import 'tailwindcss/utilities';
 
+/* Theme Colors */
+:root {
+  --mood-color: #1DB954; /* Default mood color */
+  --mood-happy: #FFD700;    /* Bright Yellow - Happy */
+  --mood-peaceful: #98FB98;  /* Pale Green - Peaceful */
+  --mood-romantic: #FF69B4;  /* Hot Pink - Romantic */
+  --mood-sad: #4169E1;      /* Royal Blue - Sad */
+  --mood-energetic: #FF4500; /* Orange Red - Energetic */
+  --mood-dark: #800080;     /* Purple - Dark */
+  --mood-chill: #40E0D0;    /* Turquoise - Chill */
+  --mood-epic: #DC143C;     /* Crimson - Epic */
+  --mood-dreamy: #DDA0DD;   /* Plum - Dreamy */
+}
+
 /* Active Navigation Link */
 .active {
   color: #06b6d4; /* text-cyan-500 equivalent */
