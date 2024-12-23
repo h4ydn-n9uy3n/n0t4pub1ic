@@ -1,14 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind base styles */
+@import 'tailwindcss/base';
+
+/* Tailwind component classes */
+@import 'tailwindcss/components';
+
+/* Tailwind utility classes */
+@import 'tailwindcss/utilities';
 
 /* Active Navigation Link */
 .active {
-  @apply text-cyan-500;
+  color: #06b6d4; /* text-cyan-500 equivalent */
 }
 
 .active svg {
-  @apply text-cyan-500;
+  color: #06b6d4; /* text-cyan-500 equivalent */
 }
 
 .bar:nth-child(2) {
