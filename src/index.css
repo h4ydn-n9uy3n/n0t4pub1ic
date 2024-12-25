@@ -1,0 +1,109 @@
+/* Tailwind base styles */
+@import 'tailwindcss/base';
+
+/* Tailwind component classes */
+@import 'tailwindcss/components';
+
+/* Tailwind utility classes */
+@import 'tailwindcss/utilities';
+
+/* Theme Colors */
+:root {
+  --mood-color: #1DB954; /* Default mood color */
+  --mood-happy: #FFD700;    /* Bright Yellow - Happy */
+  --mood-peaceful: #98FB98;  /* Pale Green - Peaceful */
+  --mood-romantic: #FF69B4;  /* Hot Pink - Romantic */
+  --mood-sad: #4169E1;      /* Royal Blue - Sad */
+  --mood-energetic: #FF4500; /* Orange Red - Energetic */
+  --mood-dark: #800080;     /* Purple - Dark */
+  --mood-chill: #40E0D0;    /* Turquoise - Chill */
+  --mood-epic: #DC143C;     /* Crimson - Epic */
+  --mood-dreamy: #DDA0DD;   /* Plum - Dreamy */
+}
+
+/* Active Navigation Link */
+.active {
+  color: #06b6d4; /* text-cyan-500 equivalent */
+}
+
+.active svg {
+  color: #06b6d4; /* text-cyan-500 equivalent */
+}
+
+.bar:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.bar:nth-child(4) {
+  animation-delay: 0.6s;
+}
+.bar:nth-child(5) {
+  animation-delay: 0.8s;
+}
+.bar:nth-child(6) {
+  animation-delay: 1s;
+}
+
+.smooth-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Progress Bar Styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Progress Bar Track */
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #4a4a4a;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* Progress Bar Fill */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  background-color: var(--mood-color, #1DB954);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+}
+
+/* Firefox styles */
+input[type="range"]::-moz-range-track {
+  background: #4a4a4a;
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  border-radius: 50%;
+  background-color: var(--mood-color, #1DB954);
+  height: 16px;
+  width: 16px;
+}
+
+input[type="range"]::-moz-range-progress {
+  background-color: var(--mood-color, #1DB954);
+  height: 4px;
+  border-radius: 2px;
+}
